@@ -4,10 +4,13 @@
 
 
 FindCircleApp::FindCircleApp(int &argc, char **argv)
-: QApplication(argc, argv),
-m_mainWin(nullptr)
+ : QApplication(argc, argv)
+ , m_mainWin(nullptr)
 {
 	//³õÊ¼»¯Ãû×Ö
+	// helloworld!
+	int x = 0;
+	int y = 0;
 	QCoreApplication::setOrganizationName(QLatin1String("NCHU"));
 	QCoreApplication::setApplicationName(QLatin1String("FindCircleApp"));
 	QCoreApplication::setApplicationVersion(QLatin1String("0.0"));

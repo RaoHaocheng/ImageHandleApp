@@ -2,8 +2,8 @@
 #include <QPainter>
 
 PaintWidget::PaintWidget(QWidget *parent)
-	: QWidget(parent),
-	m_paintState(COMPLETE)
+	: QWidget(parent)
+	, m_paintState(COMPLETE)
 {
 
 }

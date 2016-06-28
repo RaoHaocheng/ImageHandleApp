@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestTools", "TestTools\TestTools.vcxproj", "{13B31104-9F75-442C-BB3F-D448BE226134}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CameraCalibration", "CameraCalibration\CameraCalibration.vcxproj", "{10100366-8E0D-4B70-9FAE-45B7547EB604}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FindCircleApp", "FindCircleApp\FindCircleApp.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13B31104-9F75-442C-BB3F-D448BE226134}.Debug|Win32.ActiveCfg = Debug|Win32
+		{13B31104-9F75-442C-BB3F-D448BE226134}.Debug|Win32.Build.0 = Debug|Win32
+		{13B31104-9F75-442C-BB3F-D448BE226134}.Debug|x64.ActiveCfg = Debug|x64
+		{13B31104-9F75-442C-BB3F-D448BE226134}.Release|Win32.ActiveCfg = Release|Win32
+		{13B31104-9F75-442C-BB3F-D448BE226134}.Release|Win32.Build.0 = Release|Win32
+		{13B31104-9F75-442C-BB3F-D448BE226134}.Release|x64.ActiveCfg = Release|x64
+		{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}.Debug|Win32.Build.0 = Debug|Win32
+		{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}.Debug|x64.ActiveCfg = Debug|x64
+		{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}.Release|Win32.ActiveCfg = Release|Win32
+		{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}.Release|Win32.Build.0 = Release|Win32
+		{FAFD9348-DCCA-4D40-838E-F6304F2A0ABA}.Release|x64.ActiveCfg = Release|x64
+		{10100366-8E0D-4B70-9FAE-45B7547EB604}.Debug|Win32.ActiveCfg = Debug|Win32
+		{10100366-8E0D-4B70-9FAE-45B7547EB604}.Debug|Win32.Build.0 = Debug|Win32
+		{10100366-8E0D-4B70-9FAE-45B7547EB604}.Debug|x64.ActiveCfg = Debug|x64
+		{10100366-8E0D-4B70-9FAE-45B7547EB604}.Release|Win32.ActiveCfg = Release|Win32
+		{10100366-8E0D-4B70-9FAE-45B7547EB604}.Release|Win32.Build.0 = Release|Win32
+		{10100366-8E0D-4B70-9FAE-45B7547EB604}.Release|x64.ActiveCfg = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|Win32.Build.0 = Debug|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.ActiveCfg = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.Build.0 = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|Win32.ActiveCfg = Release|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|Win32.Build.0 = Release|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

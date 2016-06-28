@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<pcvDistortionCoeffs_Left type_id="opencv-matrix">
+  <rows>5</rows>
+  <cols>1</cols>
+  <dt>d</dt>
+  <data>
+    -2.7902677061412024e-049 -3.7565388031259187e-037
+    -9.5048816434841033e-056 4.8299888358965765e-055
+    -2.6506500611937019e-037</data></pcvDistortionCoeffs_Left>
+</opencv_storage>

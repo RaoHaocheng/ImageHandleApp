@@ -8,6 +8,17 @@
 #include <vector>
 
 
+/***************************************************************************
+* 函数名称：   FindCircleWin
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  QWidget * parent
+* 返回值　：   
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/06/30      饶智博        添加
+***************************************************************************/
 FindCircleWin::FindCircleWin(QWidget *parent)
 	: QMainWindow(parent),
 	m_paintWidget(nullptr)
@@ -16,6 +27,16 @@ FindCircleWin::FindCircleWin(QWidget *parent)
 	iniUi();
 }
 
+/***************************************************************************
+* 函数名称：   ~FindCircleWin
+* 摘　　要：   
+* 全局影响：   public 
+* 返回值　：   
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/06/30      饶智博        添加
+***************************************************************************/
 FindCircleWin::~FindCircleWin()
 {
 	if (nullptr != m_paintWidget)
@@ -24,6 +45,17 @@ FindCircleWin::~FindCircleWin()
 	m_paintWidget = nullptr;
 }
 
+/***************************************************************************
+* 函数名称：   openFile
+* 摘　　要：   
+* 全局影响：   private 
+* 参　　数：   [in]  const QString & path
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/06/30      饶智博        添加
+***************************************************************************/
 void FindCircleWin::openFile(const QString &path)
 {
 	QString fileName;
@@ -47,17 +79,48 @@ void FindCircleWin::openFile(const QString &path)
 	}
 }
 
+/***************************************************************************
+* 函数名称：   saveFile
+* 摘　　要：   
+* 全局影响：   private 
+* 参　　数：   [in]  const QString & path
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/06/30      饶智博        添加
+***************************************************************************/
 void FindCircleWin::saveFile(const QString &path)
 {
 
 }
 
+/***************************************************************************
+* 函数名称：   clearImg
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/06/30      饶智博        添加
+***************************************************************************/
 void FindCircleWin::clearImg()
 {
 	m_paintWidget->clearPaintWidget();
 	m_currentPath = "";
 }
 
+/***************************************************************************
+* 函数名称：   iniUi
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/06/30      饶智博        添加
+***************************************************************************/
 void FindCircleWin::iniUi()
 {
 	// 控制界面大小，并使其居中
@@ -72,6 +135,7 @@ void FindCircleWin::iniUi()
 	setCentralWidget(m_paintWidget);
 
 	// 初始化界面
+	// 初始化菜单栏,初始化文件菜单栏
 	QMenu *fileMenu = new QMenu(QStringLiteral("文件"), this);
 	QAction *openAction = fileMenu->addAction(QStringLiteral("打开..."));
 	openAction->setShortcut(QKeySequence(tr("Ctrl+O")));
@@ -82,12 +146,14 @@ void FindCircleWin::iniUi()
 	QAction *quitAction = fileMenu->addAction(QStringLiteral("退出"));
 	quitAction->setShortcuts(QKeySequence::Quit);
 
+	// 连接实现函数函数
 	menuBar()->addMenu(fileMenu);
 	connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
 	connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
 	connect(clearImgAction, SIGNAL(triggered()), this, SLOT(clearImg()));
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+	// 初始化找圆方法函数
 	QMenu *findCircleMenu = new QMenu(QStringLiteral("找圆"), this);
 	QAction *CICAction = findCircleMenu->addAction(QStringLiteral("CIC"));
 

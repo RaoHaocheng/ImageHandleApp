@@ -2,8 +2,11 @@
 #include <QPainter>
 
 
- float PaintWidget::m_scale = 1;
- float PaintWidget::m_times = 1.2;
+float PaintWidget::m_scale = 1;
+float PaintWidget::m_times = 1.2;
+
+const float MIN_SIZE = 0.1;
+const float MAX_SIZE = 5.0;
 
 /***************************************************************************
 * 函数名称：   PaintWidget
@@ -19,6 +22,8 @@
 PaintWidget::PaintWidget(QWidget *parent, QRect pos)
 	: QWidget(parent)
 	, m_paintState(COMPLETE)
+	, m_parent(parent)
+	, m_imgPos(QPoint(0,0))
 {
 
 }
@@ -48,7 +53,7 @@ void PaintWidget::paintEvent(QPaintEvent * event)
 
 	// 画出图片
 	setPaintState(PaintState::DRAWING);
-	painter.drawImage(0, 0, m_image);
+	painter.drawImage(m_imgPos.x(), m_imgPos.y(), m_image);
 	setPaintState(PaintState::COMPLETE);
 
 }
@@ -105,9 +110,9 @@ void PaintWidget::setImg(QImage img)
 	m_image = img;
 	m_srcImg = img;
 	m_scale = 1;
+	setImgPos(QPoint(0,0));
 
-	// 更新数据
-	update();
+	emit reSize(m_image.size());
 }
 
 
@@ -127,29 +132,32 @@ void PaintWidget::wheelEvent(QWheelEvent *event)
 	int numDegrees = event->delta() / 8;//滚动的角度，*8就是鼠标滚动的距离
 	int numSteps = numDegrees / 15;//滚动的步数，*15就是鼠标滚动的角度
 
+	// 放大或则缩小图片
 	if (numSteps < 0)
 	{
-		if (m_scale > 0.1)
+		if (m_scale > MIN_SIZE)
 			m_scale /= m_times;
 
-		if (m_scale < 0.1)
-			m_scale = 0.1;
+		if (m_scale < MIN_SIZE)
+			m_scale = MIN_SIZE;
 
 		scaleImg();
 	}
 	else if (numSteps > 0)
 	{
-		if (m_scale < 5)
+		if (m_scale < MAX_SIZE)
 			m_scale *= m_times;
 
-		if (m_scale >5)
-			m_scale = 5;
+		if (m_scale >MAX_SIZE)
+			m_scale = MAX_SIZE;
 
 		scaleImg();
 	}
 
+	// 更新图片
 	update();
-	event->accept();
+	emit reSize(m_image.size());	// 发送图片信息的改变
+	event->accept();				// 信息处理完了
 }
 
 /***************************************************************************
@@ -199,4 +207,78 @@ void PaintWidget::setPos(QRect pos)
 void PaintWidget::scaleImg(float scale)
 {
 	m_image = m_srcImg.scaled(QSize(m_srcImg.size().width() * scale, m_srcImg.size().height() * scale));
+}
+
+/***************************************************************************
+* 函数名称：   checkSize
+* 摘　　要：   
+* 全局影响：   protected 
+* 返回值　：   bool
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/02      饶智博        添加
+***************************************************************************/
+bool PaintWidget::checkSize(QSize size)
+{
+	if (size.width() < m_image.width() || size.height() < m_image.height())
+	{
+		emit reSize(m_image.size());
+		return true;
+	}
+
+	return false;
+}
+
+/***************************************************************************
+* 函数名称：   setImgPos
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  QPoint point
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/03      饶智博        添加
+***************************************************************************/
+void PaintWidget::setImgPos(QPoint point)
+{
+	m_imgPos.setX(point.x());
+	m_imgPos.setY(point.y());
+	update();
+}
+
+/***************************************************************************
+* 函数名称：   setImgPosX
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  int x
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/03      饶智博        添加
+***************************************************************************/
+void PaintWidget::setImgPosX(int x)
+{
+	m_imgPos.setX(x);
+	update();
+}
+
+
+/***************************************************************************
+* 函数名称：   setImgPosY
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  int y
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/03      饶智博        添加
+***************************************************************************/
+void PaintWidget::setImgPosY(int y)
+{
+	m_imgPos.setY(y);
+	update();
 }

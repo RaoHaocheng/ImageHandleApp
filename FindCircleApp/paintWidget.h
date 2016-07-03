@@ -25,10 +25,14 @@ public:
 	inline void setImgScale(float scale) { m_scale = scale; } // 设置倍率
 	inline float ImgScale() const { return m_scale; }         // 返回当前倍率
 	void scaleImg(float scale = m_scale);                     // 放缩中间中的图片
+	bool checkSize(QSize);                                    // 检查当前的图片大小是否超过控件大小
+	void setImgPosX(int);                                     // 设置图片的显示位置
+	void setImgPosY(int);                                     
+	void setImgPos(QPoint);                        
 
 // 定义的信号
 signals:
-	void reSize(QSize imgSize);							    // 发送图片大小改变的信号
+	void reSize(QSize imgSize);							      // 发送图片大小改变的信号
 
 // 私有的结构类型
 protected:
@@ -53,8 +57,10 @@ private:
 	QImage m_image;						 // 用于显示图片
 	QImage m_srcImg;                     // 用于保存原始图片
 	PaintState m_paintState;             // 当前画图状态
-	static float m_scale;                       // 当前当前放大的状态
-	static float m_times;                       // 当前倍率
+	QWidget* m_parent;                   // 副窗口指针
+	static float m_scale;                // 当前当前放大的状态
+	static float m_times;                // 当前倍率
+	QPoint m_imgPos;                     // 先前图片的显示位置
 
 };
 

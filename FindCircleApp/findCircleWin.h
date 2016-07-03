@@ -2,6 +2,7 @@
 #define FINDCIRCLEWIN_H
 
 #include <QtWidgets/QMainWindow>
+#include <QScrollBar>
 #include "ui_findcircleapp.h"
 #include "paintWidget.h"
 
@@ -17,20 +18,28 @@ public:
 	FindCircleWin(QWidget *parent = 0);
 	~FindCircleWin();
 
-private slots:
-	void openFile(const QString &path = QString());
-	void saveFile(const QString &path = QString());
-	void clearImg();
-
-	void findCircleCIC();
+protected:
+	void resizeEvent(QResizeEvent *event);
 
 private:
 	void iniUi();
 
+protected slots:
+	void checkSize(QSize);
+
+private slots:
+	void openFile(const QString &path = QString());
+	void saveFile(const QString &path = QString());
+	void clearImg();
+	void findCircleCIC();
+	void changeHScrollVaule(int);
+	void changeVScrollVaule(int);
+
 private:
 	PaintWidget* m_paintWidget;
 	QString m_currentPath;
-
+	QScrollBar* m_verticalScroll;
+	QScrollBar* m_horizontalScroll;
 };
 
 #endif // FINDCIRCLEAPP_H

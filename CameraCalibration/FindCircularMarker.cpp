@@ -524,6 +524,7 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 			if (ratio < params.minConvexity || ratio >= params.maxConvexity)
 				continue;
 		}
+
 #ifdef STEP_TIME_TEST
 		dbStepTime = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 		std::cout << "Exclude Infomation by Convexity in seconds:" << t << std::endl;
@@ -545,7 +546,13 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 			cv::Point2d pt = contours[contourIdx][pointIdx];
 			dists.push_back(norm(center.location - pt));
 		}
+		// 重新排列数据
 		std::sort(dists.begin(), dists.end());
+		
+   		if (!CheckReliability(dists,0.65,0.55))
+   			continue;
+
+		// 计算半径
 		center.radius = (dists[(dists.size() - 1) / 2] + dists[dists.size() / 2]) / 2.;
 
 		// 与上一个进行对比
@@ -553,22 +560,19 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 		if (vct_ponits.size()){
 			double dist = norm(vct_ponits.at(vct_ponits.size() - 1).location - center.location);
 			double disr = vct_ponits.at(vct_ponits.size() - 1).radius - center.radius;
-			//bIsNew = dist >= params.minDistBetweenBlobs &&  dist >= vct_ponits.at(vct_ponits.size() - 1).radius && dist >= center.radius;
-			//bIsNew = dist >= params.minDistBetweenBlobs &&  vct_ponits.at(vct_ponits.size() - 1).radius - center.radius <= params.minDistBetweenBlobs;
 			bIsNew = dist >= params.minDistBetweenBlobs || vct_ponits.at(vct_ponits.size() - 1).radius - center.radius >= params.minDistBetweenBlobs;
-		
-		}
-
-		if (center.location.x > 800 && center.location.x<920 && center.location.y>400 && center.location.y < 500)
-		{
-			int x = 0;
-			x++;
 		}
 
 		if (bIsNew)
 			vct_ponits.push_back(center);                    // 加入到容器中去
 		else
 			continue;
+
+ 		if (center.location.x > 800 && center.location.x<920 && center.location.y>400 && center.location.y < 500)
+ 		{
+ 			int x = 0;
+ 			x++;
+ 		}
 
 
 		// 显示图片
@@ -1118,21 +1122,19 @@ void FindCircularMarker::FindCircleBySamplingTrianglesImproved(IplImage* pImg, s
 void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
 	cv::SimpleBlobDetector::Params params, std::vector<ST_CENTER>& vct_ponits, BOOL bShow /* = FALSE */)
 {
-	if (CV_8UC1 != cvMatImage.type())
-	{
-		vct_ponits.clear();
-		return;
-	}
+	vct_ponits.clear();
 	// 新建一个数据缓存区域
 	cv::Mat cvMatTemImg = cvMatImage.clone();  // 复制图片，以免出现问题
 	cv::Mat src_gray;                          // 灰度图   
 
-	// 如果不是灰度图就转成灰度图
-//	if (IPL_DEPTH_8U != cvMatTemImg.depth())
-//		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	if (CV_8UC1 != cvMatImage.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray=cvMatTemImg.clone();
+
 
 	// 转一下图片
-	IplImage* pImage = &IplImage(cvMatTemImg);
+	IplImage* pImage = &IplImage(src_gray);
 	IplImage* pCannyImage = cvCreateImage(cvGetSize(pImage), IPL_DEPTH_8U, 1);
 
 	// 下面是算法真正使用的时间
@@ -1148,13 +1150,12 @@ void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
 	// 看是否要显示出图片
 	if (bShow){
 		const char* windows_name = "canny";
-	//	cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
-	//	imshow(windows_name, cv::Mat(pCannyImage));
-	//	cvWaitKey(0);
+		cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
+		imshow(windows_name, cv::Mat(pCannyImage));
+		cvWaitKey(0);
 	}
 
 	FindCircle(pCannyImage, params, vct_ponits, bShow);
-	//FindCircleImproved(cv::Mat(pCannyImage), params, vct_ponits, bShow);
 
 #ifdef TIME_TEST
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
@@ -1344,8 +1345,6 @@ void FindCircularMarker::FindCircleByWaterThed(const cv::Mat& cvMatImage,
 		cvWaitKey(0);
 	}
 
-
-
 	FindCircle(pCannyImage, params, vct_ponits, bShow);
 	//FindCircleImproved(cv::Mat(pCannyImage), params, vct_ponits, bShow);
 
@@ -1355,4 +1354,41 @@ void FindCircularMarker::FindCircleByWaterThed(const cv::Mat& cvMatImage,
 #endif // TIME_TEST
 
 	cvReleaseImage(&pCannyImage);
+}
+
+BOOL FindCircularMarker::CheckReliability(const std::vector<double> src, 
+										  const double dbVarPrecision /* = 0.3 */, 
+										  const double dbRaPrecision /* = 0.7 */)
+{
+	double dbAverage = 0;
+	double dbVariance = 0;
+	double dbPossible = 0;
+	double dbTemVar = 0;
+	const int SCALE = 10;
+
+	for (int i = 0; i < (int)src.size(); i++)
+		dbAverage = dbAverage + src.at(i);
+
+	dbAverage = dbAverage / (int)src.size();
+
+	for (int i = 0; i < (int)src.size(); i++)
+	{
+		dbTemVar = abs((src.at(i) - dbAverage));
+		dbPossible += dbTemVar;
+		dbVariance += dbTemVar*dbTemVar;
+	}
+
+	dbVariance /= (int)src.size()-1;
+	double x = dbVariance;
+	dbVariance = sqrt(dbVariance) / dbAverage;
+	dbVariance *= SCALE;
+	dbPossible /= (int)src.size()*dbAverage;
+	dbPossible *= SCALE;
+
+	if ((dbVariance < dbVarPrecision && dbPossible < dbRaPrecision) || x<0.3)
+		//(dbPossible > dbRaPrecision)// && 
+		return TRUE;
+	else
+		return FALSE;
+
 }

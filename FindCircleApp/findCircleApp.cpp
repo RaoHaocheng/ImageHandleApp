@@ -26,9 +26,7 @@ FindCircleWin* FindCircleApp::newMainWindow()
 	if (nullptr != m_mainWin)
 		delete m_mainWin;
 	m_mainWin = new FindCircleWin();
-
 	m_mainWin->show();
-
 	return m_mainWin;
 }
 

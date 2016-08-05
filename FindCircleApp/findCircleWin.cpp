@@ -101,6 +101,25 @@ void FindCircleWin::openFile(const QString &path)
 ***************************************************************************/
 void FindCircleWin::saveFile(const QString &path)
 {
+	QString fileName;
+	if (path.isNull())
+		fileName = QFileDialog::getSaveFileName(this, QStringLiteral("保存图片文件"),
+		m_currentPath, "Image files (*.jpg *.bmp *.png)");
+	else
+		fileName = path;
+
+	if (!fileName.isEmpty()) {
+		QFile file(fileName);
+		if (file.exists()) {
+			QMessageBox::critical(this, QStringLiteral("保存图片文件"),
+				QStringLiteral("保存图片文件") +
+				QString("'%1'").arg(fileName) + QStringLiteral("失败！"));
+			return;
+		}
+
+		QImage img = m_paintWidget->Img();
+		img.save(fileName);
+	}
 
 }
 
@@ -172,13 +191,57 @@ void FindCircleWin::iniUi()
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
 	// 初始化找圆方法函数
-	QMenu *findCircleMenu = new QMenu(QStringLiteral("找圆"), this);
+	QMenu *findCircleMenu = new QMenu(QStringLiteral("圆形定位方法"), this);
 	QAction *CICAction = findCircleMenu->addAction(QStringLiteral("CIC"));
+	QAction *EDPFAction = findCircleMenu->addAction(QStringLiteral("EDPF"));
 
 	menuBar()->addMenu(findCircleMenu);
 	connect(CICAction, SIGNAL(triggered()), this, SLOT(findCircleCIC()));
+	connect(EDPFAction, SIGNAL(triggered()), this, SLOT(findCircleEDPF()));
+
+	// 图像处理
+	QMenu *imgHandleMenu = new QMenu(QStringLiteral("图片处理方法"), this);
+	QAction *gaussianAction = imgHandleMenu->addAction(QStringLiteral("高斯噪声"));
+	QAction *autoCannyAction = imgHandleMenu->addAction(QStringLiteral("自动化Canny"));
+
+	menuBar()->addMenu(imgHandleMenu);
+	connect(gaussianAction, SIGNAL(triggered()), this, SLOT(addGaussianNoise()));
+	connect(autoCannyAction, SIGNAL(triggered()), this, SLOT(autoCanny()));
 }
 
+/***************************************************************************
+* 函数名称：   findCircleEDPF
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/28      饶智博        添加
+***************************************************************************/
+void FindCircleWin::findCircleEDPF()
+{
+	FindContoursMethod f;
+	QImage img = m_paintWidget->Img();
+	IplImage pImage = QImage2cvIplImage(img);
+	cv::Mat dst;
+	f.findContoursByEDPF(&pImage, dst);
+
+	img = Mat2QImage(dst);
+	m_paintWidget->setImg(img);
+}
+
+
+/***************************************************************************
+* 函数名称：   findCircleCIC
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/28      饶智博        添加
+***************************************************************************/
 void FindCircleWin::findCircleCIC()
 {
 	QImage img = m_paintWidget->Img();
@@ -193,16 +256,21 @@ void FindCircleWin::findCircleCIC()
 	params.minThreshold = 5;
 	params.thresholdStep = 5;
 	params.minArea = 40;
-	params.minConvexity = 0.8f;
-	params.minInertiaRatio = 0.73f;
-	params.minCircularity = 0.8f;
-	params.maxArea = 10000000000;
-	params.blobColor = 0;
-	params.maxThreshold = 65;
-	params.maxConvexity = 1.2f;
-	params.maxCircularity = 1.2f;
-	params.maxInertiaRatio = 1.2f;
-	params.minDistBetweenBlobs = 1;
+//  	params.minConvexity = 0.8f;
+//  	params.minInertiaRatio = 0.73f;
+//  	params.minCircularity = 0.8f;
+	params.minConvexity = 0.6f;
+	params.minInertiaRatio = 0.6f;
+	params.minCircularity = 0.6f;
+ 	params.maxArea = 10000000000;
+ 	params.blobColor = 0;
+ 	params.maxThreshold = 65;
+ 	params.maxConvexity = 1.2f;
+ 	params.maxCircularity = 1.2f;
+ 	params.maxInertiaRatio = 1.2f;
+
+
+	params.minDistBetweenBlobs = 1; 
 
 	FindCircularMarker f;
 	cv::Mat keypointsImage;
@@ -291,12 +359,79 @@ void FindCircleWin::resizeEvent(QResizeEvent *event)
 	event->accept();
 }
 
+/***************************************************************************
+* 函数名称：   changeHScrollVaule
+* 摘　　要：   
+* 全局影响：   private 
+* 参　　数：   [in]  int vaule
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/23      饶智博        添加
+***************************************************************************/
 void FindCircleWin::changeHScrollVaule(int vaule)
 {
 	m_paintWidget->setImgPosX(-vaule);
 }
 
+/***************************************************************************
+* 函数名称：   changeVScrollVaule
+* 摘　　要：   
+* 全局影响：   private 
+* 参　　数：   [in]  int vaule
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/23      饶智博        添加
+***************************************************************************/
 void FindCircleWin::changeVScrollVaule(int vaule)
 {
 	m_paintWidget->setImgPosY(-vaule);
+}
+
+/***************************************************************************
+* 函数名称：   addGaussianNoise
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/23      饶智博        添加
+***************************************************************************/
+void FindCircleWin::addGaussianNoise()
+{
+	QImage img = m_paintWidget->Img();
+	IplImage pImage = QImage2cvIplImage(img);
+
+	IplImage* dst = AddGaussianNoise(&pImage, 0, 0.02);
+
+
+	img = IplImage2QImage(*dst);
+	m_paintWidget->setImg(img);
+}
+
+/***************************************************************************
+* 函数名称：   autoCanny
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/28      饶智博        添加
+***************************************************************************/
+void FindCircleWin::autoCanny()
+{
+	QImage img = m_paintWidget->Img();
+	IplImage pImage = QImage2cvIplImage(img);
+	cv::Mat dst;
+
+	AutoCanny(cv::Mat(&pImage), dst);
+
+	img = Mat2QImage(dst);
+	m_paintWidget->setImg(img);
+
 }

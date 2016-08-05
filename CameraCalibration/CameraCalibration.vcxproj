@@ -23,11 +23,13 @@
     <ClInclude Include="CameraCalibration.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="FindCircularMarker.h" />
+    <ClInclude Include="FindCountersMethod.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseImageHandleFunction.cpp" />
     <ClCompile Include="CameraCalibration.cpp" />
     <ClCompile Include="FindCircularMarker.cpp" />
+    <ClCompile Include="FindCountersMethod.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>CameraCalibration</ProjectName>

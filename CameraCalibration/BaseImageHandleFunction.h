@@ -70,4 +70,17 @@ DLLS_PORT BOOL ConvertRgbToYuv(BYTE* src, BYTE* dst,const int width,const int he
 // 在制定的位置上画圆圈
 DLLS_PORT BOOL DrawCircle(cv::Mat& src, cv::Mat& keypointsImage, std::vector<ST_CENTER> centers);
 
+// 计算方差
+DLLS_PORT double Variance(std::vector<double> src);
+
+// 细化
+DLLS_PORT cv::Mat thinImage(const cv::Mat & src, const int maxIterations = -1);
+
+// 差异化
+DLLS_PORT double DifferntPoint(const std::vector<double> src, const double dbDotPrecision = 1);
+
+// 自动canny算子
+DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst);
+
+
 #endif // !BASEIMAGEHANDLEFUNCTION_H

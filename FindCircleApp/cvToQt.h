@@ -2,6 +2,7 @@
 #define CVTOQT_H
 
 #include "..\CameraCalibration\FindCircularMarker.h"
+#include "..\CameraCalibration\FindCountersMethod.h"
 #include <QImage>
 
 QImage Mat2QImage(const cv::Mat& mat);

@@ -27,6 +27,9 @@
     <ClInclude Include="FindCircularMarker.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="FindCountersMethod.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseImageHandleFunction.cpp">
@@ -36,6 +39,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FindCircularMarker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FindCountersMethod.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -2,8 +2,8 @@
 
 /***************************************************************************
 * 函数名称：   Otsu
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  IplImage * src
 * 返回值　：   int
 *
@@ -17,7 +17,7 @@ DLLS_PORT int  Otsu(IplImage* src)
 	int iWidth = src->width;             // 图片宽度
 	long lSize = iHeight * iWidth;       // 图片大小
 
-	float fHistogram[GRAY_SCALE_VALUE] = { 0 }; 
+	float fHistogram[GRAY_SCALE_VALUE] = { 0 };
 	for (int i = 0; i < iHeight; i++){
 		unsigned char* p = (unsigned char*)src->imageData + src->widthStep * i;
 		for (int j = 0; j < iWidth; j++)
@@ -26,13 +26,13 @@ DLLS_PORT int  Otsu(IplImage* src)
 
 	int    iThreshold;                         // 返回的阈值
 	long   lFrontgroundTotalGrayValue = 0,
-		   lBackgroundTotalGrayValue = 0;      // 存储前景的灰度总和和背景灰度总和  
-	long   lFrontgroundTotalNum = 0, 
-		   lBackgroundTotalNum = 0;            // 前景的总个数和背景的总个数  
-	double dbFrontgroundRation = 0, 
-		   dbBackgroundRation = 0;             // 前景和背景所占整幅图像的比例  
-	double dbFrontgroundAveGrayValue = 0, 
-		   dbBackgroundAveGrayValue = 0;       // 前景和背景的平均灰度  
+		lBackgroundTotalGrayValue = 0;      // 存储前景的灰度总和和背景灰度总和  
+	long   lFrontgroundTotalNum = 0,
+		lBackgroundTotalNum = 0;            // 前景的总个数和背景的总个数  
+	double dbFrontgroundRation = 0,
+		dbBackgroundRation = 0;             // 前景和背景所占整幅图像的比例  
+	double dbFrontgroundAveGrayValue = 0,
+		dbBackgroundAveGrayValue = 0;       // 前景和背景的平均灰度  
 	double dbVariance = 0;                     // 最大类间方差  
 	double dbAveGrayValue = 0;
 	double dbMaxVariance = 0;
@@ -46,7 +46,7 @@ DLLS_PORT int  Otsu(IplImage* src)
 		lBackgroundTotalNum = 0;
 		dbFrontgroundRation = 0;
 		dbBackgroundRation = 0;
-		
+
 		for (int j = 0; j < i; j++)
 		{
 			lFrontgroundTotalNum += (long)(fHistogram[j]);
@@ -67,7 +67,7 @@ DLLS_PORT int  Otsu(IplImage* src)
 
 		dbAveGrayValue = dbFrontgroundAveGrayValue * dbFrontgroundRation
 			+ dbBackgroundAveGrayValue * dbBackgroundRation; //图像的平均灰度  
-		dbVariance = dbFrontgroundRation * dbBackgroundRation *  (dbFrontgroundAveGrayValue - dbBackgroundAveGrayValue) 
+		dbVariance = dbFrontgroundRation * dbBackgroundRation *  (dbFrontgroundAveGrayValue - dbBackgroundAveGrayValue)
 			* (dbFrontgroundAveGrayValue - dbBackgroundAveGrayValue);
 		if (dbVariance > dbMaxVariance)
 		{
@@ -85,7 +85,7 @@ DLLS_PORT int  Otsu(IplImage* src)
 /***************************************************************************
 * 函数名称：   Get3DPos
 * 摘　　要：   ///解矛盾方程组
-* 全局影响：   public 
+* 全局影响：   public
 * 参　　数：   [inout]  double * pdbQ
 * 参　　数：   [inout]  double * pdb2D
 * 参　　数：   [inout]  double * pdbSolution
@@ -116,8 +116,8 @@ DLLS_PORT void  Get3DPos(double* pdbQ, double* pdb2D, double *pdbSolution)
 
 /***************************************************************************
 * 函数名称：   AddGaussianNoise
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  IplImage * src
 * 参　　数：   [in]  double dbVariance
 * 返回值　：   DLLS_PORT IplImage*
@@ -136,8 +136,8 @@ DLLS_PORT IplImage*  AddGaussianNoise(IplImage* src, double dbVariance)
 
 /***************************************************************************
 * 函数名称：   AddGaussianNoise
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  IplImage * src
 * 参　　数：   [in]  double dbMean
 * 参　　数：   [in]  double dbVariance
@@ -160,7 +160,7 @@ DLLS_PORT IplImage*  AddGaussianNoise(IplImage* src, double dbMean, double dbVar
 	cv::Mat cvMatImg(temImg);                    // 转换成为一个矩阵
 	cv::Mat cvMatDst(temImg, true);
 	cv::Mat cvMatNoise(cvMatImg.size(), CV_64F);
-	
+
 	// 图片归一化处理
 	normalize(cvMatImg, cvMatDst, GAUSSIAN_MEAN, GAUSSIAN_VARIANCE, CV_MINMAX, CV_64F);
 	// 生成噪声
@@ -185,8 +185,8 @@ DLLS_PORT IplImage*  AddGaussianNoise(IplImage* src, double dbMean, double dbVar
 
 /***************************************************************************
 * 函数名称：   GradientEstimation
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  IplImage * src
 * 参　　数：   [in]  cv::Mat & grad_x
 * 参　　数：   [in]  cv::Mat & grad_y
@@ -205,8 +205,8 @@ DLLS_PORT void GradientEstimation(IplImage* src, cv::Mat &grad_x, cv::Mat &grad_
 
 /***************************************************************************
 * 函数名称：   GradientEstimation
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  cv::Mat src
 * 参　　数：   [in]  cv::Mat & grad_x
 * 参　　数：   [in]  cv::Mat & grad_y
@@ -227,13 +227,13 @@ DLLS_PORT void GradientEstimation(cv::Mat src, cv::Mat &grad_x, cv::Mat &grad_y,
 
 	// 如果图片没有内容就返回
 	if (!src.data)
-		return ;
-	
+		return;
+
 	// 将图片加入高斯核函数
 	GaussianBlur(src_gray, src_gray, cv::Size(5, 5), 0, 1.28, cv::BORDER_DEFAULT);
 
 	// 将变异后的图片转成灰度图
-//	cvtColor(src, src_gray, CV_BGR2GRAY);
+	//	cvtColor(src, src_gray, CV_BGR2GRAY);
 
 	cv::Mat tem_grad_x, tem_grad_y;
 
@@ -260,8 +260,8 @@ DLLS_PORT void GradientEstimation(cv::Mat src, cv::Mat &grad_x, cv::Mat &grad_y,
 
 /***************************************************************************
 * 函数名称：   GradientEstimation
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  cv::Mat src
 * 参　　数：   [in]  cv::Mat & dst
 * 返回值　：   DLLS_PORT void
@@ -310,8 +310,8 @@ DLLS_PORT void GradientEstimation(cv::Mat src, cv::Mat &dst)
 
 /***************************************************************************
 * 函数名称：   GetCircle
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f & p1
 * 参　　数：   [in]  const cv::Point2f & p2
 * 参　　数：   [in]  const cv::Point2f & p3
@@ -350,8 +350,8 @@ DLLS_PORT void GetCircle(const cv::Point& p1, const cv::Point& p2,
 
 /***************************************************************************
 * 函数名称：   GetDistance
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f p1
 * 参　　数：   [in]  const cv::Point2f p2
 * 返回值　：   DLLS_PORT double
@@ -361,14 +361,14 @@ DLLS_PORT void GetCircle(const cv::Point& p1, const cv::Point& p2,
 *2016/04/22      饶智博        添加
 ***************************************************************************/
 DLLS_PORT double GetDistance(const cv::Point2f p1, const cv::Point2f p2)
-{ 
+{
 	return sqrtf(powf((p1.x - p2.x), 2) + powf((p1.y - p2.y), 2));
 }
 
 /***************************************************************************
 * 函数名称：   IsInCircle
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f point
 * 参　　数：   [in]  const ST_CENTER center
 * 参　　数：   [in]  const double dbPrecision
@@ -380,7 +380,7 @@ DLLS_PORT double GetDistance(const cv::Point2f p1, const cv::Point2f p2)
 ***************************************************************************/
 DLLS_PORT BOOL IsInCircle(const cv::Point point, const ST_CENTER center, const double dbPrecision)
 {
-	if (abs(GetDistance(point, center.location)-center.radius )<= dbPrecision)
+	if (abs(GetDistance(point, center.location) - center.radius) <= dbPrecision)
 		return TRUE;
 	else
 		return FALSE;
@@ -389,8 +389,8 @@ DLLS_PORT BOOL IsInCircle(const cv::Point point, const ST_CENTER center, const d
 
 /***************************************************************************
 * 函数名称：   CalculateGradientDrectAngle
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f grad
 * 参　　数：   [in]  const cv::Point2f twoPointVector
 * 返回值　：   DLLS_PORT BOOL
@@ -406,8 +406,8 @@ DLLS_PORT double CalculateGradientDrectAngle(const cv::Point2f grad, const cv::P
 
 /***************************************************************************
 * 函数名称：   CalculateVectorDistance
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f twoPointVector
 * 返回值　：   DLLS_PORT double
 *
@@ -422,8 +422,8 @@ DLLS_PORT double CalculateVectorDistance(const cv::Point2f twoPointVector)
 
 /***************************************************************************
 * 函数名称：   DotProduct
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f p1
 * 参　　数：   [in]  const cv::Point2f p2
 * 返回值　：   DLLS_PORT double
@@ -439,8 +439,8 @@ DLLS_PORT double DotProduct(const cv::Point2f p1, const cv::Point2f p2)
 
 /***************************************************************************
 * 函数名称：   NormalizerPoint
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Point2f p1
 * 参　　数：   [out] cv::Point2f & p2
 * 返回值　：   DLLS_PORT BOOL
@@ -451,20 +451,20 @@ DLLS_PORT double DotProduct(const cv::Point2f p1, const cv::Point2f p2)
 ***************************************************************************/
 DLLS_PORT BOOL NormalizerPoint(const cv::Point2f p1, cv::Point2f& p2)
 {
-	const double distance = CalculateVectorDistance(p1);	
+	const double distance = CalculateVectorDistance(p1);
 	if (distance == 0)
 		return FALSE;
 
-	p2.x =(float)( p1.x / distance);
-	p2.y =(float)( p1.y / distance);
+	p2.x = (float)(p1.x / distance);
+	p2.y = (float)(p1.y / distance);
 
 	return TRUE;
 }
 
 /***************************************************************************
 * 函数名称：   DetectIsoscelesTriangles
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Mat src
 * 参　　数：   [in]  const cv::Point2f p1
 * 参　　数：   [in]  const cv::Point2f & p2
@@ -481,20 +481,20 @@ DLLS_PORT BOOL DetectIsoscelesTriangles(const cv::Mat src, const cv::Point2f p1,
 	cv::Mat grad_x, grad_y;                                  // 梯度数字
 	cv::Point2f gradPoint;                                   // 准备做为去除某点的坐标点
 
-	GradientEstimation(cvMatTemImg, grad_x, grad_y,false);   // 计算梯度
+	GradientEstimation(cvMatTemImg, grad_x, grad_y, false);   // 计算梯度
 
-	cv::Point2f grad_p1,grad_p2;
+	cv::Point2f grad_p1, grad_p2;
 
 	// 对梯度数据
-	grad_p1.x = (float)grad_x.at<unsigned char>((int)p1.x,(int)p1.y);
+	grad_p1.x = (float)grad_x.at<unsigned char>((int)p1.x, (int)p1.y);
 	grad_p1.y = (float)grad_y.at<unsigned char>((int)p1.x, (int)p1.y);
 	NormalizerPoint(grad_p1, grad_p1);
-	
+
 	grad_p2.x = (float)grad_x.at<unsigned char>((int)p2.x, (int)p2.y);
 	grad_p2.y = (float)grad_y.at<unsigned char>((int)p2.x, (int)p2.y);
 	NormalizerPoint(grad_p2, grad_p2);
-	
-	cv::Point2f p1_p2,p2_p1;
+
+	cv::Point2f p1_p2, p2_p1;
 	p1_p2 = p2 - p1;
 	p2_p1 = p1 - p2;
 
@@ -505,12 +505,12 @@ DLLS_PORT BOOL DetectIsoscelesTriangles(const cv::Mat src, const cv::Point2f p1,
 	/*
 	for (int i = 0; i < cvMatTemImg.rows;i++)
 	{
-		for (int j = 0; j < cvMatTemImg.cols; j++)
-		{
-			unsigned char x = grad_x.at<unsigned char>(i, j);
-			std::cout << (int)x << " ";
-		}
-		std::cout << std::endl;
+	for (int j = 0; j < cvMatTemImg.cols; j++)
+	{
+	unsigned char x = grad_x.at<unsigned char>(i, j);
+	std::cout << (int)x << " ";
+	}
+	std::cout << std::endl;
 	}
 	*/
 
@@ -520,8 +520,8 @@ DLLS_PORT BOOL DetectIsoscelesTriangles(const cv::Mat src, const cv::Point2f p1,
 
 /***************************************************************************
 * 函数名称：   DetectIsoscelesTriangles
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const cv::Mat grad_x
 * 参　　数：   [in]  const cv::Mat grad_y
 * 参　　数：   [in]  const cv::Point2f p1
@@ -536,15 +536,15 @@ DLLS_PORT BOOL DetectIsoscelesTriangles(const cv::Mat src, const cv::Point2f p1,
 ***************************************************************************/
 DLLS_PORT BOOL DetectIsoscelesTriangles(const cv::Mat grad_x, const cv::Mat grad_y,
 	const cv::Point2f p1, const cv::Point2f p2,
-	const double dbDifPrecision , const double dbDotPrecision)
+	const double dbDifPrecision, const double dbDotPrecision)
 {
 	cv::Point2f grad_p1, grad_p2;
 	// 取出对梯度数据
-	grad_p1.x = (float)grad_x.at<unsigned char>((int)p1.y ,(int)p1.x);
+	grad_p1.x = (float)grad_x.at<unsigned char>((int)p1.y, (int)p1.x);
 	grad_p1.y = (float)grad_y.at<unsigned char>((int)p1.y, (int)p1.x);
 	NormalizerPoint(grad_p1, grad_p1);                                    // 归一化
 
-	grad_p2.x = (float)grad_x.at<unsigned char>((int)p2.y, (int)p2.x) ;
+	grad_p2.x = (float)grad_x.at<unsigned char>((int)p2.y, (int)p2.x);
 	grad_p2.y = (float)grad_y.at<unsigned char>((int)p2.y, (int)p2.x);
 	NormalizerPoint(grad_p2, grad_p2);                                    // 归一化
 
@@ -566,8 +566,8 @@ DLLS_PORT BOOL DetectIsoscelesTriangles(const cv::Mat grad_x, const cv::Mat grad
 
 /***************************************************************************
 * 函数名称：   AnalysisCluster
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const std::vector<cv::Point> contour
 * 参　　数：   [in]  const cv::Mat grad_x
 * 参　　数：   [in]  const cv::Mat grad_y
@@ -614,8 +614,8 @@ DLLS_PORT BOOL AnalysisCluster(const std::vector<cv::Point> contour, const cv::M
 }
 /***************************************************************************
 * 函数名称：   IsThreePointInLine
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  cv::Point2f p1
 * 参　　数：   [in]  cv::Point2f p2
 * 参　　数：   [in]  cv::Point2f p3
@@ -640,8 +640,8 @@ DLLS_PORT BOOL IsThreePointInLine(const cv::Point2f p1, const cv::Point2f p2, co
 
 /***************************************************************************
 * 函数名称：   IsInCircle
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  const std::vector<cv::Point> counter
 * 参　　数：   [in]  std::vector<ST_CENTER> & center
 * 返回值　：   DLLS_PORT BOOL
@@ -650,7 +650,7 @@ DLLS_PORT BOOL IsThreePointInLine(const cv::Point2f p1, const cv::Point2f p2, co
 *  [日期]     [作者/修改者]  [修改原因]
 *2016/04/25      饶智博        添加
 ***************************************************************************/
-DLLS_PORT BOOL IsInCircle(const std::vector<cv::Point> contour, std::vector<ST_CENTER>& center,const double dbPrecision)
+DLLS_PORT BOOL IsInCircle(const std::vector<cv::Point> contour, std::vector<ST_CENTER>& center, const double dbPrecision)
 {
 	// 设置实验次数
 	const int iTestNum = 1000;
@@ -677,7 +677,7 @@ DLLS_PORT BOOL IsInCircle(const std::vector<cv::Point> contour, std::vector<ST_C
 /***************************************************************************
 * 函数名称：   ConvertClosedContour
 * 摘　　要：   被废弃
-* 全局影响：   public 
+* 全局影响：   public
 * 参　　数：   [in]  std::vector<cv::Point> & contours
 * 返回值　：   DLLS_PORT void
 *
@@ -715,14 +715,14 @@ DLLS_PORT void ConvertClosedContour(std::vector<cv::Point> &contours)
 		int x, y;
 
 		if (dx > 0)
-		for (int i = 0; i < abs(dx) ; i++)
+		for (int i = 0; i < abs(dx); i++)
 		{
 			x = iPoint_x + i;
 			y = (int)(k*x + b);
 			contours.push_back(cv::Point(x, y));
 		}
 		else
-		for (int i = 0; i < abs(dx) ; i++)
+		for (int i = 0; i < abs(dx); i++)
 		{
 			x = iPoint_x - i;
 			y = (int)(k*x + b);
@@ -739,14 +739,14 @@ DLLS_PORT void ConvertClosedContour(std::vector<cv::Point> &contours)
 		int x, y;
 
 		if (dx > 0)
-		for (int i = 0; i < abs(dy) ; i++)
+		for (int i = 0; i < abs(dy); i++)
 		{
 			y = iPoint_y + i;
 			x = (int)(k*y + b);
 			contours.push_back(cv::Point(x, y));
 		}
 		else
-		for (int i = 0; i < abs(dy) ; i++)
+		for (int i = 0; i < abs(dy); i++)
 		{
 			y = iPoint_y - i;
 			x = (int)(k*y + b);
@@ -761,7 +761,7 @@ DLLS_PORT void ConvertClosedContour(std::vector<cv::Point> &contours)
 /***************************************************************************
 * 函数名称：   FindNick
 * 摘　　要：   被废弃
-* 全局影响：   public 
+* 全局影响：   public
 * 参　　数：   [in]  std::vector<cv::Point> & contours
 * 返回值　：   DLLS_PORT BOOL
 *
@@ -786,8 +786,8 @@ DLLS_PORT BOOL FindNick(std::vector<cv::Point> &contours)
 
 /***************************************************************************
 * 函数名称：   ConvertRgbToYuv
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  BYTE * src
 * 参　　数：   [out]  BYTE * dst
 * 参　　数：   [in]  const int width
@@ -841,8 +841,8 @@ DLLS_PORT BOOL ConvertRgbToYuv(BYTE* src, BYTE* dst, const int width, const int 
 
 /***************************************************************************
 * 函数名称：   DrawCircle
-* 摘　　要：   
-* 全局影响：   public 
+* 摘　　要：
+* 全局影响：   public
 * 参　　数：   [in]  cv::Mat & src
 * 参　　数：   [out]  cv::Mat & keypointsImage
 * 参　　数：   [in]  std::vector<ST_CENTER> centers
@@ -854,10 +854,14 @@ DLLS_PORT BOOL ConvertRgbToYuv(BYTE* src, BYTE* dst, const int width, const int 
 ***************************************************************************/
 DLLS_PORT BOOL DrawCircle(cv::Mat& src, cv::Mat& keypointsImage, std::vector<ST_CENTER> centers)
 {
+	cv::Mat srcGray;
 	if (CV_8UC1 != src.type())
-		return FALSE;
+		cvtColor(src, srcGray, CV_RGB2GRAY);
+	else
+		srcGray = src.clone();
 
-	cvtColor(src, keypointsImage, CV_GRAY2RGB);
+	cvtColor(srcGray, keypointsImage, CV_GRAY2RGB);
+
 	for (int i = 0; i < (int)centers.size(); i++)
 	{
 		ST_CENTER center;
@@ -867,4 +871,249 @@ DLLS_PORT BOOL DrawCircle(cv::Mat& src, cv::Mat& keypointsImage, std::vector<ST_
 	}
 
 	return TRUE;
+}
+
+/***************************************************************************
+* 函数名称：   Variance
+* 摘　　要：
+* 全局影响：   public
+* 参　　数：   [in]  std::vector<double> src
+* 返回值　：   DLLS_PORT double
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/20      饶智博        添加
+***************************************************************************/
+DLLS_PORT double Variance(std::vector<double> src)
+{
+	double dbAverage = 0;
+	double dbVariance = 0;
+
+	for (int i = 0; i < (int)src.size(); i++)
+		dbAverage = dbAverage + src.at(i);
+
+	dbAverage = dbAverage / (int)src.size();
+
+	for (int i = 0; i < (int)src.size(); i++)
+		dbVariance = dbVariance + (src.at(i) - dbAverage)*(src.at(i) - dbAverage);
+
+	dbVariance = dbVariance / (int)src.size();
+
+	return dbVariance;
+}
+
+/***************************************************************************
+* 函数名称：   thinImage
+* 摘　　要：   需要说明的，输入须是二值图像，且白色像素需要为1而不是255
+* 全局影响：   public
+* 参　　数：   [in]  const cv::Mat & src
+* 参　　数：   [in]  const int maxIterations
+* 返回值　：   DLLS_PORT cv::Mat
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/21      饶智博        添加
+***************************************************************************/
+DLLS_PORT cv::Mat thinImage(const cv::Mat & src, const int maxIterations)
+{
+	assert(src.type() == CV_8UC1);
+	cv::Mat dst;
+	int width = src.cols;
+	int height = src.rows;
+	src.copyTo(dst);
+	int count = 0;  //记录迭代次数  
+	while (true)
+	{
+		count++;
+		if (maxIterations != -1 && count > maxIterations) //限制次数并且迭代次数到达  
+			break;
+		std::vector<uchar *> mFlag; //用于标记需要删除的点  
+		//对点标记  
+		for (int i = 0; i < height; ++i)
+		{
+			uchar * p = dst.ptr<uchar>(i);
+			for (int j = 0; j < width; ++j)
+			{
+				//如果满足四个条件，进行标记  
+				//  p9 p2 p3  
+				//  p8 p1 p4  
+				//  p7 p6 p5  
+				uchar p1 = p[j];
+				if (p1 != 1) continue;
+				uchar p4 = (j == width - 1) ? 0 : *(p + j + 1);
+				uchar p8 = (j == 0) ? 0 : *(p + j - 1);
+				uchar p2 = (i == 0) ? 0 : *(p - dst.step + j);
+				uchar p3 = (i == 0 || j == width - 1) ? 0 : *(p - dst.step + j + 1);
+				uchar p9 = (i == 0 || j == 0) ? 0 : *(p - dst.step + j - 1);
+				uchar p6 = (i == height - 1) ? 0 : *(p + dst.step + j);
+				uchar p5 = (i == height - 1 || j == width - 1) ? 0 : *(p + dst.step + j + 1);
+				uchar p7 = (i == height - 1 || j == 0) ? 0 : *(p + dst.step + j - 1);
+				if ((p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) >= 2 && (p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) <= 6)
+				{
+					int ap = 0;
+					if (p2 == 0 && p3 == 1) ++ap;
+					if (p3 == 0 && p4 == 1) ++ap;
+					if (p4 == 0 && p5 == 1) ++ap;
+					if (p5 == 0 && p6 == 1) ++ap;
+					if (p6 == 0 && p7 == 1) ++ap;
+					if (p7 == 0 && p8 == 1) ++ap;
+					if (p8 == 0 && p9 == 1) ++ap;
+					if (p9 == 0 && p2 == 1) ++ap;
+
+					if (ap == 1 && p2 * p4 * p6 == 0 && p4 * p6 * p8 == 0)
+					{
+						//标记  
+						mFlag.push_back(p + j);
+					}
+				}
+			}
+		}
+
+		//将标记的点删除  
+		for (std::vector<uchar *>::iterator i = mFlag.begin(); i != mFlag.end(); ++i)
+		{
+			**i = 0;
+		}
+
+		//直到没有点满足，算法结束  
+		if (mFlag.empty())
+		{
+			break;
+		}
+		else
+		{
+			mFlag.clear();//将mFlag清空  
+		}
+
+		//对点标记  
+		for (int i = 0; i < height; ++i)
+		{
+			uchar * p = dst.ptr<uchar>(i);
+			for (int j = 0; j < width; ++j)
+			{
+				//如果满足四个条件，进行标记  
+				//  p9 p2 p3  
+				//  p8 p1 p4  
+				//  p7 p6 p5  
+				uchar p1 = p[j];
+				if (p1 != 1) continue;
+				uchar p4 = (j == width - 1) ? 0 : *(p + j + 1);
+				uchar p8 = (j == 0) ? 0 : *(p + j - 1);
+				uchar p2 = (i == 0) ? 0 : *(p - dst.step + j);
+				uchar p3 = (i == 0 || j == width - 1) ? 0 : *(p - dst.step + j + 1);
+				uchar p9 = (i == 0 || j == 0) ? 0 : *(p - dst.step + j - 1);
+				uchar p6 = (i == height - 1) ? 0 : *(p + dst.step + j);
+				uchar p5 = (i == height - 1 || j == width - 1) ? 0 : *(p + dst.step + j + 1);
+				uchar p7 = (i == height - 1 || j == 0) ? 0 : *(p + dst.step + j - 1);
+
+				if ((p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) >= 2 && (p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) <= 6)
+				{
+					int ap = 0;
+					if (p2 == 0 && p3 == 1) ++ap;
+					if (p3 == 0 && p4 == 1) ++ap;
+					if (p4 == 0 && p5 == 1) ++ap;
+					if (p5 == 0 && p6 == 1) ++ap;
+					if (p6 == 0 && p7 == 1) ++ap;
+					if (p7 == 0 && p8 == 1) ++ap;
+					if (p8 == 0 && p9 == 1) ++ap;
+					if (p9 == 0 && p2 == 1) ++ap;
+
+					if (ap == 1 && p2 * p4 * p8 == 0 && p2 * p6 * p8 == 0)
+					{
+						//标记  
+						mFlag.push_back(p + j);
+					}
+				}
+			}
+		}
+
+		//将标记的点删除  
+		for (std::vector<uchar *>::iterator i = mFlag.begin(); i != mFlag.end(); ++i)
+		{
+			**i = 0;
+		}
+
+		//直到没有点满足，算法结束  
+		if (mFlag.empty())
+		{
+			break;
+		}
+		else
+		{
+			mFlag.clear();//将mFlag清空  
+		}
+	}
+	return dst;
+}
+
+/***************************************************************************
+* 函数名称：   DifferntPoint
+* 摘　　要：
+* 全局影响：   public
+* 参　　数：   [in]  const std::vector<double> src
+* 参　　数：   [in]  const double dbDotPrecision
+* 返回值　：   DLLS_PORT double
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/07/22      饶智博        添加
+***************************************************************************/
+DLLS_PORT double DifferntPoint(const std::vector<double> src, const double dbDotPrecision /* = 1 */)
+{
+	double dbPossible = 0;
+	double dbAverage = 0;
+
+	const int SCALE = 10;
+
+	for (int i = 0; i < (int)src.size(); i++)
+		dbAverage = dbAverage + src.at(i);
+
+	dbAverage /= (int)src.size();
+
+	for (int i = 0; i < (int)src.size(); i++){
+		dbPossible += abs(src.at(i) - dbAverage);
+	}
+
+	dbPossible /= (int)src.size()*dbAverage;
+
+	return dbPossible;
+}
+
+
+/***************************************************************************
+* 函数名称：   AutoCanny
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Mat & src
+* 参　　数：   [out] cv::Mat & dst
+* 返回值　：   DLLS_PORT void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/08/05      饶智博        添加
+***************************************************************************/
+DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst)
+{
+	// 新建一个数据缓存区域
+	cv::Mat cvMatTemImg = src.clone();  // 复制图片，以免出现问题
+	cv::Mat src_gray;                          // 灰度图   
+
+	if (CV_8UC1 != src.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatTemImg.clone();
+
+	IplImage* pImage = &IplImage(src_gray);
+	IplImage* pCannyImage = cvCreateImage(cvGetSize(pImage), IPL_DEPTH_8U, 1);
+
+	//blur(cv::Mat(pImage), cv::Mat(pCannyImage), cv::Size(3, 3));
+	// 使用Otsu计算出阈值
+	int cannyThreshold = Otsu(pImage);
+	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
+	cvCanny(pImage, pCannyImage, cannyThreshold / 3, cannyThreshold * 3, 3);
+	//CannyEdgeDetector
+
+	dst = cv::Mat(pCannyImage).clone();
+
+	cvReleaseImage(&pCannyImage);
 }

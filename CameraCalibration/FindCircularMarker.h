@@ -58,6 +58,10 @@ protected:
 		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // 重载函数，为了解决Mat的调用的问题
 
 private:
+	BOOL CheckReliability(const std::vector<double> src, 
+		const double dbVarPrecision = 0.3, const double dbRaPrecision = 0.7);
+
+private:
 	static int m_siGobalThreHold;
 	char* m_fileName;
 };

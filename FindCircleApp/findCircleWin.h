@@ -32,8 +32,11 @@ private slots:
 	void saveFile(const QString &path = QString());
 	void clearImg();
 	void findCircleCIC();
+	void findCircleEDPF();
 	void changeHScrollVaule(int);
 	void changeVScrollVaule(int);
+	void addGaussianNoise();
+	void autoCanny();
 
 private:
 	PaintWidget* m_paintWidget;

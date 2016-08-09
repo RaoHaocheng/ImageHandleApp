@@ -5,8 +5,7 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <iostream>
-//#include <cv.h>
-//#include <highgui.h>
+#include "..\BaseFunction\BaseFunction.h"
 
 #define _CRTDBG_MAP_ALLOC
 
@@ -28,7 +27,118 @@ void on_trackbar(int threshold){
 }
 int hello();
 
+int f(void*m)
+{
+	for (;;)
+	{
+		unsigned int x = *((unsigned int*)m);
+		std::cout << x << std::endl;
+	}
+	return 0;
+}
+int f2(void*m)
+{
+	unsigned int x = *((unsigned int*)m);
+	std::cout << x << std::endl;
+	return 0;
+}
+
+
 int main()
+{
+	ThreadManage* t=ThreadManage::CreateInstance(1, 10);
+	//for (;;)
+	//{
+	t->Execute(f); 
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+	t->Execute(f);
+	Sleep(10);
+
+	Sleep(10);
+	Sleep(10);
+	Sleep(10);
+		//std::cout << "hello" << std::endl;
+		
+	//}
+
+	system("pause");
+	return 0;
+}
+
+
+int mainx()
 {
 	// ÓÃÓÚ¼ì²âÄÚ´æÐ¹Â¶
 	_CrtDumpMemoryLeaks();

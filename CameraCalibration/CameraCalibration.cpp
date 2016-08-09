@@ -782,8 +782,8 @@ CvSize CameraCalibration::GetImgSize() const
 ***************************************************************************/
 BOOL CameraCalibration::ClearImageCache(const int flags)
 {
-	if (LEFT_CAMERA_IMAGE != flags ||
-		RIGHT_CAMERA_IMAGE != flags)
+	if ((LEFT_CAMERA_IMAGE != flags) ||
+		(RIGHT_CAMERA_IMAGE != flags))
 		return FALSE;
 
 	if (LEFT_CAMERA_IMAGE == flags)// 说明有缓存
@@ -800,7 +800,7 @@ BOOL CameraCalibration::ClearImageCache(const int flags)
 	}
 
 	// 将状态设置好
-	if (m_CalibrationStep != UNSTART || m_CalibrationStep != CALIBRATION_ERROR)
+	if ((m_CalibrationStep != UNSTART) || (m_CalibrationStep != CALIBRATION_ERROR))
 		m_CalibrationStep = SET_INFO;
 
 	return TRUE;

@@ -47,7 +47,7 @@ typedef struct RECTIFY_IMG_PARAMETER
 }ST_RECTIFY_IMG_PARAMETER, *PST_RECTIFY_IMG_PARAMETER;
 
 // 使用模板类的导出工作
-template  class DLLS_PORT std::vector<IplImage*>;
+template class DLLS_PORT std::vector<IplImage*>;
 
 class DLLS_PORT CameraCalibration
 {

@@ -1110,7 +1110,7 @@ DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst)
 	// 使用Otsu计算出阈值
 	int cannyThreshold = Otsu(pImage);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	cvCanny(pImage, pCannyImage, cannyThreshold / 3, cannyThreshold * 3, 3);
+	cvCanny(pImage, pCannyImage, cannyThreshold, cannyThreshold * 2.5, 3);
 	//CannyEdgeDetector
 
 	dst = cv::Mat(pCannyImage).clone();

@@ -1,6 +1,7 @@
 // 一些需要使用的数据结构
-#ifndef DEFINE_H  // 防止头文件重复定义
-#define DEFINE_H
+// 当多个库集合在一起的时候需要注意，所有定义的头文件要不一样，不然造成新的问题
+#ifndef CAMERA_CALIBRATION_DEFINE_H  // 防止头文件重复定义
+#define CAMERA_CALIBRATION_DEFINE_H
 
 // 包含标准库中的内容
 #include <vector>    // 容器

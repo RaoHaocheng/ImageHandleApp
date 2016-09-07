@@ -1,61 +1,60 @@
-//²éÕÒÔ²ĞÎ±ê¼ÇµãµÄÀà£¬Ö÷ÒªÊÇ·â×°ÁËOPENCVÖĞµÄ¼¸¸öÀà
+ï»¿//æŸ¥æ‰¾åœ†å½¢æ ‡è®°ç‚¹çš„ç±»ï¼Œä¸»è¦æ˜¯å°è£…äº†OPENCVä¸­çš„å‡ ä¸ªç±»
 #ifndef FINDCIRCULARMARKER_H
 #define FINDCIRCULARMARKER_H
 
-// Êı¾İ½á¹¹¶¨Òå¿âÒÔ¼°ÔÚOpenCV¿âÖĞ±ØĞëÊ¹ÓÃµÄÄÚÈİ
-#include "define.h"                           // Ò»Ğ©»ù±¾µÄº¯Êı
-#include "BaseImageHandleFunction.h"          // Ò»Ğ©»ù±¾µÄº¯Êı
+// æ•°æ®ç»“æ„å®šä¹‰åº“ä»¥åŠåœ¨OpenCVåº“ä¸­å¿…é¡»ä½¿ç”¨çš„å†…å®¹
+#include "define.h"                           // ä¸€äº›åŸºæœ¬çš„å‡½æ•°
+#include "BaseImageHandleFunction.h"          // ä¸€äº›åŸºæœ¬çš„å‡½æ•°
 
-// ÓÃÓÚÕÒÔ²ĞÎ±ê¼ÇµãµÄ·½·¨,ÊÇÔÚ±ê¶¨µÄ»ù´¡ÉÏÕÒÔ²£¬µ«ÊÇÒ²¿ÉÒÔÍÑÀë±ê¶¨£¬Õâ¸öµØ·½ÒÔºóĞèÒªĞŞ¸Ä
+// ç”¨äºæ‰¾åœ†å½¢æ ‡è®°ç‚¹çš„æ–¹æ³•,æ˜¯åœ¨æ ‡å®šçš„åŸºç¡€ä¸Šæ‰¾åœ†ï¼Œä½†æ˜¯ä¹Ÿå¯ä»¥è„±ç¦»æ ‡å®šï¼Œè¿™ä¸ªåœ°æ–¹ä»¥åéœ€è¦ä¿®æ”¹
 class DLLS_PORT FindCircularMarker
 {
 public:
 	FindCircularMarker();
 	~FindCircularMarker();
-	//void SetCalibrationParameter(ST_CALIBRATION_RESULT& stResult);
-	//BOOL Computer3DPos(ST_OBJECT_POINTS& stPoints, IplImage* pLeftImg, IplImage* pRightImg);
-	void SetFileName(const char* fileName);                                           // ±£´æÎÄ¼şÃû
+	void SetFileName(const char* fileName);                                           // ä¿å­˜æ–‡ä»¶å
 
-	// ÕÒÔ²
+	// æ‰¾åœ†
 	BOOL FindCircleCenter(IplImage* pImg,
 		cv::SimpleBlobDetector::Params params, 
-		std::vector<cv::KeyPoint>& vct_ponits, BOOL bShow = FALSE);                                        // OpenCvÌá¹©ÕÒÔ²
-	void CalCircleCentrePoint(IplImage* pImg, std::vector<cv::KeyPoint>& vct_ponits, int ipointscounts);   // ¼ÆËãÔ²ĞÄ×ø±êµÄÄÚÈİ
+		std::vector<cv::KeyPoint>& vct_ponits, BOOL bShow = FALSE);                                        // OpenCvæä¾›æ‰¾åœ†
+	void CalCircleCentrePoint(IplImage* pImg, std::vector<cv::KeyPoint>& vct_ponits, int ipointscounts);   // è®¡ç®—åœ†å¿ƒåæ ‡çš„å†…å®¹
 	void FindCircleBySamplingTriangles(IplImage* pImg, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE);                                                                               // ÂÛÎÄÖĞÌá¹©µÄÕÒÔ²µÄ·½·¨
+		BOOL bShow = FALSE);                                                                               // è®ºæ–‡ä¸­æä¾›çš„æ‰¾åœ†çš„æ–¹æ³•
 	void FindCircleBySamplingTriangles(const cv::Mat& cvMatimage, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE);                                                                               // ÂÛÎÄÖĞÕÒÔ²µÄ·½·¨
+		BOOL bShow = FALSE);                                                                               // è®ºæ–‡ä¸­æ‰¾åœ†çš„æ–¹æ³•
 	
 	void FindCircleBySamplingTrianglesImproved(IplImage* pImg, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE);                                                                               // ÂÛÎÄÖĞÌá¹©µÄÕÒÔ²µÄ·½·¨
+		BOOL bShow = FALSE);                                                                               // è®ºæ–‡ä¸­æä¾›çš„æ‰¾åœ†çš„æ–¹æ³•
 
 	void FindCircleBySamplingTrianglesImproved(const cv::Mat& cvMatimage, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE);                                                                               // ÂÛÎÄÖĞÕÒÔ²µÄ·½·¨
+		BOOL bShow = FALSE);                                                                               // è®ºæ–‡ä¸­æ‰¾åœ†çš„æ–¹æ³•
 	BOOL FindCircleByThreePoint(const std::vector<cv::Point> counter,
-		ST_CENTER& center, const double dbPrecision = 0.1,  const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);         // Í¨¹ıÈıµãÈ·¶¨Ò»¸öÔ²
+		ST_CENTER& center, const double dbPrecision = 0.1,  const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);         // é€šè¿‡ä¸‰ç‚¹ç¡®å®šä¸€ä¸ªåœ†
 	BOOL FindCircleByThreePoint(const std::vector<cv::Point> counter,
 		std::vector<ST_CENTER>& centers, const double dbPrecision = 0.1, const double dbMinConfidence =0.3,
-				const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 1000);                                                     // Í¨¹ıÈıµãÈ·¶¨Ò»¸öÔ²
+				const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 1000);                                                     // é€šè¿‡ä¸‰ç‚¹ç¡®å®šä¸€ä¸ªåœ†
 
 	BOOL FindCircleByThreePoint(IplImage*pImg ,std::vector<ST_CENTER>& vct_ponits, 
-		BOOL bShow = FALSE ,const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);          // Í¨¹ıÈıµãÈ·¶¨Ò»¸öÔ²
+		BOOL bShow = FALSE ,const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);          // é€šè¿‡ä¸‰ç‚¹ç¡®å®šä¸€ä¸ªåœ†
 	BOOL FindCircleByThreePoint(const cv::Mat& cvMatimage, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);          // Í¨¹ıÈıµãÈ·¶¨Ò»¸öÔ²
+		BOOL bShow = FALSE, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);          // é€šè¿‡ä¸‰ç‚¹ç¡®å®šä¸€ä¸ªåœ†
 	void FindCircleByCICImproved(const cv::Mat& cvMatimage, cv::SimpleBlobDetector::Params params,
-		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);			// ÎÒÃÇµÄ·½·¨¸Ä½øĞÍ
+		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);			// æˆ‘ä»¬çš„æ–¹æ³•æ”¹è¿›å‹
 	void DrawCircle(IplImage* src, cv::Mat dst, std::vector<ST_CENTER>& vct_ponits, const char* saveFileName = NULL);
-
 	void FindCircleByWaterThed(const cv::Mat& cvMatimage, cv::SimpleBlobDetector::Params params,
-		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);			// ÎÒÃÇµÄ·½·¨¸Ä½øĞÍ
+		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);			// æˆ‘ä»¬çš„æ–¹æ³•æ”¹è¿›å‹
+	void FindCircleByThreadshold(const cv::Mat& cvMatimage, cv::SimpleBlobDetector::Params params,
+		std::vector<ST_CENTER>& vct_points, BOOL bShow = FALSE);
 
 protected:
-	static void Trackbar_callback(int Pos, void* Usrdata);                                                 // »Øµ÷º¯Êı,ÓÃÓÚÏÔÊ¾½ø¶ÈÌõ
+	static void Trackbar_callback(int Pos, void* Usrdata);                                                 // å›è°ƒå‡½æ•°,ç”¨äºæ˜¾ç¤ºè¿›åº¦æ¡
 	BOOL FindCircle(IplImage* pImg, cv::SimpleBlobDetector::Params params,
-		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // ĞŞ¸Äºó¿ìËÙÕÒÔ²·½·¨
+		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // ä¿®æ”¹åå¿«é€Ÿæ‰¾åœ†æ–¹æ³•
 	BOOL FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector::Params params,
-		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // ÖØÔØº¯Êı£¬ÎªÁË½â¾öMatµÄµ÷ÓÃµÄÎÊÌâ
+		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // é‡è½½å‡½æ•°ï¼Œä¸ºäº†è§£å†³Matçš„è°ƒç”¨çš„é—®é¢˜
 	BOOL FindCircleImproved(cv::Mat& cvMatimage, cv::SimpleBlobDetector::Params params,
-		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // ÖØÔØº¯Êı£¬ÎªÁË½â¾öMatµÄµ÷ÓÃµÄÎÊÌâ
+		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // é‡è½½å‡½æ•°ï¼Œä¸ºäº†è§£å†³Matçš„è°ƒç”¨çš„é—®é¢˜
 
 private:
 	BOOL CheckReliability(const std::vector<double> src, 

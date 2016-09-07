@@ -107,11 +107,11 @@ private:
 		ST_THD_INFO m_stThdInfo;
 		ThreadManage* m_parent;
 	};
-	friend Worker;                              // 需要和内存池是友缘类
+	friend Worker;                                           // 需要和内存池是友缘类
 
 	typedef std::list<Task> Tasks;							 // 任务列表
-	typedef std::vector<ST_THD_INFO> ThreadPool;				 // 用于存放线程
-	typedef ThreadPool::iterator  ThreadPoolItr;     // 用于存放线程
+	typedef std::vector<ST_THD_INFO> ThreadPool;		     // 用于存放线程
+	typedef ThreadPool::iterator  ThreadPoolItr;             // 用于存放线程
 
 	int m_iTheadNum;                            // 线程当前
 	static ThreadManage* m_instance;            // 指向当前的实例的指针

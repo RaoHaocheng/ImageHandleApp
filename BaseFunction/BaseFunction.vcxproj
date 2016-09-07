@@ -123,11 +123,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BaseFunction.h" />
+    <ClInclude Include="CommandLineParse.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="ThreadManage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThreadManage.cpp" />
+    <ClCompile Include="CommandLineParse.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

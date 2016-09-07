@@ -549,8 +549,8 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 		// 重新排列数据
 		std::sort(dists.begin(), dists.end());
 		
-   		if (!CheckReliability(dists,0.65,0.55))
-   			continue;
+//    		if (!CheckReliability(dists,0.65,0.55))
+//    			continue;
 
 		// 计算半径
 		center.radius = (dists[(dists.size() - 1) / 2] + dists[dists.size() / 2]) / 2.;
@@ -715,7 +715,7 @@ void FindCircularMarker::FindCircleBySamplingTriangles(const cv::Mat& cvMatimage
 			double disr = vct_ponits.at(vct_ponits.size() - 1).radius - center.radius;
 			//bIsNew = dist >= params.minDistBetweenBlobs &&  dist >= vct_ponits.at(vct_ponits.size() - 1).radius && dist >= center.radius;
 			//bIsNew = dist >= params.minDistBetweenBlobs &&  vct_ponits.at(vct_ponits.size() - 1).radius - center.radius <= params.minDistBetweenBlobs;
-			bIsNew = dist >= 1 || vct_ponits.at(vct_ponits.size() - 1).radius - center.radius >= 1;
+			bIsNew = dist >= 3 || vct_ponits.at(vct_ponits.size() - 1).radius - center.radius >= 3;
 		}
 
 		if (bIsNew)
@@ -1016,6 +1016,7 @@ void FindCircularMarker::FindCircleBySamplingTrianglesImproved(const cv::Mat& cv
 	// 初始化需要使用的变量
 	vct_ponits.clear();                                  // 清空结果数据
 	cv::Mat cvMatTemImg = cvMatimage.clone();            // 复制图片出来操作，以免源图被污染
+
 	std::vector < std::vector<cv::Point> > contours;     // 轮廓标记点存储的位置
 	cv::Mat keypointsImage;                              // 在这阵图片中做显示使用
 	cv::Mat grad_x, grad_y;                              // 用于计算图片梯度
@@ -1145,7 +1146,10 @@ void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
 	// 使用Otsu计算出阈值
 	int cannyThreshold = Otsu(pImage);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	cvCanny(pImage, pCannyImage, cannyThreshold, cannyThreshold * 2, 3);
+	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.5 , 3);
+//  	double low,high;
+//  	AdaptiveFindThreshold(pImage, &low, &high);
+// 	cvCanny(pImage, pCannyImage, low, high, 3);
 
 	// 看是否要显示出图片
 	if (bShow){
@@ -1306,54 +1310,38 @@ void FindCircularMarker::DrawCircle(IplImage* src, cv::Mat dst, std::vector<ST_C
 *  [日期]     [作者/修改者]  [修改原因]
 *2016/05/10      饶智博        添加
 ***************************************************************************/
-void FindCircularMarker::FindCircleByWaterThed(const cv::Mat& cvMatImage,
+void FindCircularMarker::FindCircleByThreadshold(const cv::Mat& cvMatImage,
 	cv::SimpleBlobDetector::Params params, std::vector<ST_CENTER>& vct_ponits, BOOL bShow /* = FALSE */)
 {
+	vct_ponits.clear();
 	// 新建一个数据缓存区域
 	cv::Mat cvMatTemImg = cvMatImage.clone();  // 复制图片，以免出现问题
 	cv::Mat src_gray;                          // 灰度图   
 
-	// 如果不是灰度图就转成灰度图
-	//	if (IPL_DEPTH_8U != cvMatTemImg.depth())
-	//		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	if (CV_8UC1 != cvMatImage.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatTemImg.clone();
 
 	// 转一下图片
+	IplImage* pImage = &IplImage(src_gray);
+	cv::Mat threadsholdImg;
 
-	cv::Mat keypointsImage;
-	cvtColor(cv::Mat(cvMatTemImg), keypointsImage, CV_GRAY2RGB);
-	IplImage* pImage = &IplImage(keypointsImage);
-	IplImage* pCannyImage = cvCreateImage(cvGetSize(pImage), IPL_DEPTH_32S, 1);
-
-
+	int ithreadshold = Otsu(pImage);
+	cv::threshold(cv::Mat(pImage), threadsholdImg, ithreadshold-5, 255, cv::THRESH_BINARY);
 
 	// 下面是算法真正使用的时间
 #ifdef TIME_TEST
 	double t = (double)cv::getTickCount();
 #endif // TIME_TEST
 
-	// 使用Otsu计算出阈值
-	//int cannyThreshold = Otsu(pImage);
-	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	//cvCanny(pImage, pCannyImage, cannyThreshold, cannyThreshold * 2, 3);
-	cv::watershed(cv::Mat(pImage), cv::Mat(pCannyImage));
 
-	// 看是否要显示出图片
-	if (bShow){
-		const char* windows_name = "canny";
-		//	cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
-		imshow(windows_name, cv::Mat(pCannyImage));
-		cvWaitKey(0);
-	}
-
-	FindCircle(pCannyImage, params, vct_ponits, bShow);
-	//FindCircleImproved(cv::Mat(pCannyImage), params, vct_ponits, bShow);
+	FindCircle(threadsholdImg, params, vct_ponits, bShow);
 
 #ifdef TIME_TEST
 	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 	std::cout << "Find Circle by CICImproved：" << t << std::endl;
 #endif // TIME_TEST
-
-	cvReleaseImage(&pCannyImage);
 }
 
 BOOL FindCircularMarker::CheckReliability(const std::vector<double> src, 
@@ -1391,4 +1379,67 @@ BOOL FindCircularMarker::CheckReliability(const std::vector<double> src,
 	else
 		return FALSE;
 
+}
+
+
+/***************************************************************************
+* 函数名称：   FindCircleByThreshold
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Mat & cvMatImage
+* 参　　数：   [in]  cv::SimpleBlobDetector::Params params
+* 参　　数：   [in]  std::vector<ST_CENTER> & vct_ponits
+* 参　　数：   [in]  BOOL bShow
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/08/26      饶智博        添加
+***************************************************************************/
+void FindCircularMarker::FindCircleByWaterThed(const cv::Mat& cvMatImage,
+	cv::SimpleBlobDetector::Params params, std::vector<ST_CENTER>& vct_ponits, BOOL bShow /* = FALSE */)
+{
+	// 新建一个数据缓存区域
+	cv::Mat cvMatTemImg = cvMatImage.clone();  // 复制图片，以免出现问题
+	cv::Mat src_gray;                          // 灰度图   
+
+	// 如果不是灰度图就转成灰度图
+	//	if (IPL_DEPTH_8U != cvMatTemImg.depth())
+	//		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+
+	// 转一下图片
+
+	cv::Mat keypointsImage;
+	cvtColor(cv::Mat(cvMatTemImg), keypointsImage, CV_GRAY2RGB);
+	IplImage* pImage = &IplImage(keypointsImage);
+	IplImage* pCannyImage = cvCreateImage(cvGetSize(pImage), IPL_DEPTH_32S, 1);
+
+	// 下面是算法真正使用的时间
+#ifdef TIME_TEST
+	double t = (double)cv::getTickCount();
+#endif // TIME_TEST
+
+	// 使用Otsu计算出阈值
+	//int cannyThreshold = Otsu(pImage);
+	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
+	//cvCanny(pImage, pCannyImage, cannyThreshold, cannyThreshold * 2, 3);
+	cv::watershed(cv::Mat(pImage), cv::Mat(pCannyImage));
+
+	// 看是否要显示出图片
+	if (bShow){
+		const char* windows_name = "canny";
+		//	cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
+		imshow(windows_name, cv::Mat(pCannyImage));
+		cvWaitKey(0);
+	}
+
+	FindCircle(pCannyImage, params, vct_ponits, bShow);
+	//FindCircleImproved(cv::Mat(pCannyImage), params, vct_ponits, bShow);
+
+#ifdef TIME_TEST
+	t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+	std::cout << "Find Circle by CICImproved：" << t << std::endl;
+#endif // TIME_TEST
+
+	cvReleaseImage(&pCannyImage);
 }

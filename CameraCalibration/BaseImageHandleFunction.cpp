@@ -869,6 +869,7 @@ DLLS_PORT BOOL DrawCircle(cv::Mat& src, cv::Mat& keypointsImage, std::vector<ST_
 		cv::circle(keypointsImage, center.location, (int)center.radius, cv::Scalar(0, 0, 255)); // 画一个圆 
 		cv::circle(keypointsImage, center.location, (int)1, cv::Scalar(0, 255, 255)); // 画一个圆 
 	}
+	//cvtColor(tem, keypointsImage, CV_RGB2GRAY);
 
 	return TRUE;
 }
@@ -971,19 +972,15 @@ DLLS_PORT cv::Mat thinImage(const cv::Mat & src, const int maxIterations)
 
 		//将标记的点删除  
 		for (std::vector<uchar *>::iterator i = mFlag.begin(); i != mFlag.end(); ++i)
-		{
 			**i = 0;
-		}
+	
 
 		//直到没有点满足，算法结束  
 		if (mFlag.empty())
-		{
 			break;
-		}
 		else
-		{
-			mFlag.clear();//将mFlag清空  
-		}
+			mFlag.clear();//将mFlag清空
+
 
 		//对点标记  
 		for (int i = 0; i < height; ++i)
@@ -1029,19 +1026,14 @@ DLLS_PORT cv::Mat thinImage(const cv::Mat & src, const int maxIterations)
 
 		//将标记的点删除  
 		for (std::vector<uchar *>::iterator i = mFlag.begin(); i != mFlag.end(); ++i)
-		{
 			**i = 0;
-		}
+	
 
 		//直到没有点满足，算法结束  
 		if (mFlag.empty())
-		{
 			break;
-		}
 		else
-		{
 			mFlag.clear();//将mFlag清空  
-		}
 	}
 	return dst;
 }
@@ -1106,14 +1098,117 @@ DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst)
 	IplImage* pImage = &IplImage(src_gray);
 	IplImage* pCannyImage = cvCreateImage(cvGetSize(pImage), IPL_DEPTH_8U, 1);
 
-	//blur(cv::Mat(pImage), cv::Mat(pCannyImage), cv::Size(3, 3));
+	blur(cv::Mat(pImage), cv::Mat(pCannyImage), cv::Size(3, 3));
 	// 使用Otsu计算出阈值
 	int cannyThreshold = Otsu(pImage);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	cvCanny(pImage, pCannyImage, cannyThreshold, cannyThreshold * 2.5, 3);
+	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.2 , 3);
+//	cvCanny(pImage, pCannyImage, 40, 100, 3);
+
+// 	double low, high;
+// 	AdaptiveFindThreshold(pImage, &low, &high);
+// 	cvCanny(pImage, pCannyImage, low, high, 3);
 	//CannyEdgeDetector
 
 	dst = cv::Mat(pCannyImage).clone();
 
 	cvReleaseImage(&pCannyImage);
+}
+
+/***************************************************************************
+* 函数名称：   AdaptiveFindThreshold
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const CvArr * image
+* 参　　数：   [in]  double * low
+* 参　　数：   [in]  double * high
+* 参　　数：   [in]  int aperture_size
+* 返回值　：   DLLS_PORT void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/08/26      饶智博        添加
+***************************************************************************/
+DLLS_PORT void AdaptiveFindThreshold(const CvArr* image, double *low, double *high, int aperture_size)
+{
+	cv::Mat src = cv::cvarrToMat(image);
+	const int cn = src.channels();
+	cv::Mat dx(src.rows, src.cols, CV_16SC(cn));
+	cv::Mat dy(src.rows, src.cols, CV_16SC(cn));
+
+	cv::Sobel(src, dx, CV_16S, 1, 0, aperture_size, 1, 0, cv::BORDER_DEFAULT);
+	cv::Sobel(src, dy, CV_16S, 0, 1, aperture_size, 1, 0, cv::BORDER_DEFAULT);
+
+	CvMat _dx = dx, _dy = dy;
+	_AdaptiveFindThreshold(&_dx, &_dy, low, high);
+}
+                               
+/***************************************************************************
+* 函数名称：   _AdaptiveFindThreshold
+* 摘　　要：   // 仿照matlab，自适应求高低两个门限  
+* 全局影响：   public 
+* 参　　数：   [in]  CvMat * dx
+* 参　　数：   [in]  CvMat * dy
+* 参　　数：   [in]  double * low
+* 参　　数：   [in]  double * high
+* 返回值　：   DLLS_PORT void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/08/26      饶智博        添加
+***************************************************************************/
+DLLS_PORT void _AdaptiveFindThreshold(CvMat *dx, CvMat *dy, double *low, double *high)
+{
+	CvSize size;
+	IplImage *imge = 0;
+	int i, j;
+	CvHistogram *hist;
+	int hist_size = 255;
+	float range_0[] = { 0, 256 };
+	float* ranges[] = { range_0 };
+	double PercentOfPixelsNotEdges = 0.7;
+	size = cvGetSize(dx);
+	imge = cvCreateImage(size, IPL_DEPTH_32F, 1);
+	// 计算边缘的强度, 并存于图像中                                          
+	float maxv = 0;
+	for (i = 0; i < size.height; i++)
+	{
+		const short* _dx = (short*)(dx->data.ptr + dx->step*i);
+		const short* _dy = (short*)(dy->data.ptr + dy->step*i);
+		float* _image = (float *)(imge->imageData + imge->widthStep*i);
+		for (j = 0; j < size.width; j++)
+		{
+			_image[j] = (float)(abs(_dx[j]) + abs(_dy[j]));
+			maxv = maxv < _image[j] ? _image[j] : maxv;
+
+		}
+	}
+	if (maxv == 0){
+		*high = 0;
+		*low = 0;
+		cvReleaseImage(&imge);
+		return;
+	}
+
+	// 计算直方图                                                            
+	range_0[1] = maxv;
+	hist_size = (int)(hist_size > maxv ? maxv : hist_size);
+	hist = cvCreateHist(1, &hist_size, CV_HIST_ARRAY, ranges, 1);
+	cvCalcHist(&imge, hist, 0, NULL);
+	int total = (int)(size.height * size.width * PercentOfPixelsNotEdges);
+	float sum = 0;
+	int icount = hist->mat.dim[0].size;
+
+	float *h = (float*)cvPtr1D(hist->bins, 0);
+	for (i = 0; i < icount; i++)
+	{
+		sum += h[i];
+		if (sum > total)
+			break;
+	}
+	// 计算高低门限                                                          
+	*high = (i + 1) * maxv / hist_size;
+	*low = *high * 0.4;
+	cvReleaseImage(&imge);
+	cvReleaseHist(&hist);
 }

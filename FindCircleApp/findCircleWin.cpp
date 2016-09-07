@@ -1,7 +1,5 @@
 #include "findCircleWin.h"
 
-#include "cvToQt.h"
-
 #include <QDesktopWidget>
 #include <QtWidgets>
 #include <QImage>
@@ -120,7 +118,6 @@ void FindCircleWin::saveFile(const QString &path)
 		QImage img = m_paintWidget->Img();
 		img.save(fileName);
 	}
-
 }
 
 /***************************************************************************
@@ -193,20 +190,28 @@ void FindCircleWin::iniUi()
 	// 初始化找圆方法函数
 	QMenu *findCircleMenu = new QMenu(QStringLiteral("圆形定位方法"), this);
 	QAction *CICAction = findCircleMenu->addAction(QStringLiteral("CIC"));
-	QAction *EDPFAction = findCircleMenu->addAction(QStringLiteral("EDPF"));
+	QAction *EDPFAction = findCircleMenu->addAction(QStringLiteral("iTCiD"));
+	QAction *findCircleThresholdAction = findCircleMenu->addAction(QStringLiteral("threshold"));
 
 	menuBar()->addMenu(findCircleMenu);
 	connect(CICAction, SIGNAL(triggered()), this, SLOT(findCircleCIC()));
 	connect(EDPFAction, SIGNAL(triggered()), this, SLOT(findCircleEDPF()));
+	connect(findCircleThresholdAction, SIGNAL(triggered()), this, SLOT(findCircleThreadshold()));
 
 	// 图像处理
 	QMenu *imgHandleMenu = new QMenu(QStringLiteral("图片处理方法"), this);
 	QAction *gaussianAction = imgHandleMenu->addAction(QStringLiteral("高斯噪声"));
 	QAction *autoCannyAction = imgHandleMenu->addAction(QStringLiteral("自动化Canny"));
+	QAction *drawCircleAction = imgHandleMenu->addAction(QStringLiteral("画圆"));
+	QAction *thresholdAction = imgHandleMenu->addAction(QStringLiteral("阈值分割"));
+	QAction *batAction = imgHandleMenu->addAction(QStringLiteral("批处理"));
 
 	menuBar()->addMenu(imgHandleMenu);
 	connect(gaussianAction, SIGNAL(triggered()), this, SLOT(addGaussianNoise()));
 	connect(autoCannyAction, SIGNAL(triggered()), this, SLOT(autoCanny()));
+	connect(drawCircleAction, SIGNAL(triggered()), this, SLOT(drawCircle()));
+	connect(thresholdAction, SIGNAL(triggered()), this, SLOT(threadshold()));
+	connect(batAction, SIGNAL(triggered()), this, SLOT(batImgHandle()));
 }
 
 /***************************************************************************
@@ -221,13 +226,24 @@ void FindCircleWin::iniUi()
 ***************************************************************************/
 void FindCircleWin::findCircleEDPF()
 {
-	FindContoursMethod f;
+// 	FindContoursMethod f;
+// 	QImage img = m_paintWidget->Img();
+// 	IplImage pImage = QImage2cvIplImage(img);
+// 	cv::Mat dst;
+	//f.findContoursByEDPF(&pImage, dst);
+
+
 	QImage img = m_paintWidget->Img();
 	IplImage pImage = QImage2cvIplImage(img);
-	cv::Mat dst;
-	f.findContoursByEDPF(&pImage, dst);
 
-	img = Mat2QImage(dst);
+	FindCircularMarker f;
+	cv::Mat keypointsImage;
+	std::vector<ST_CENTER> centers;
+
+	f.FindCircleBySamplingTriangles(&pImage, centers, false);
+	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
+
+	img = Mat2QImage(keypointsImage);
 	m_paintWidget->setImg(img);
 }
 
@@ -256,27 +272,26 @@ void FindCircleWin::findCircleCIC()
 	params.minThreshold = 5;
 	params.thresholdStep = 5;
 	params.minArea = 40;
-//  	params.minConvexity = 0.8f;
-//  	params.minInertiaRatio = 0.73f;
-//  	params.minCircularity = 0.8f;
-	params.minConvexity = 0.6f;
-	params.minInertiaRatio = 0.6f;
-	params.minCircularity = 0.6f;
+//    	params.minConvexity = 0.8f;
+//    	params.minInertiaRatio = 0.73f;
+//    	params.minCircularity = 0.8f;
+ 	params.minConvexity = 0.82f;
+ 	params.minInertiaRatio = 0.70f;
+ 	params.minCircularity = 0.75f;
  	params.maxArea = 10000000000;
  	params.blobColor = 0;
  	params.maxThreshold = 65;
  	params.maxConvexity = 1.2f;
  	params.maxCircularity = 1.2f;
  	params.maxInertiaRatio = 1.2f;
-
-
 	params.minDistBetweenBlobs = 1; 
 
 	FindCircularMarker f;
 	cv::Mat keypointsImage;
-	std::vector<ST_CENTER> centers;
+	
 
-	f.FindCircleByCICImproved(&pImage, params, centers, false);
+	f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, false);
+	//f.FindCircleByThreshold(cv::Mat(&pImage), params, centers, false);
 	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
 
 // 	cvtColor(cv::Mat(&pImage), keypointsImage, CV_GRAY2RGB);
@@ -408,7 +423,6 @@ void FindCircleWin::addGaussianNoise()
 
 	IplImage* dst = AddGaussianNoise(&pImage, 0, 0.02);
 
-
 	img = IplImage2QImage(*dst);
 	m_paintWidget->setImg(img);
 }
@@ -434,4 +448,163 @@ void FindCircleWin::autoCanny()
 	img = Mat2QImage(dst);
 	m_paintWidget->setImg(img);
 
+}
+
+/***************************************************************************
+* 函数名称：   drawCircle
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/08/23      饶智博        添加
+***************************************************************************/
+void FindCircleWin::drawCircle()
+{
+	QImage img = m_paintWidget->Img();
+	IplImage pImage = QImage2cvIplImage(img);
+
+	cv::Mat keypointsImage;
+	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
+	//cvtColor(cv::Mat(&pImage), keypointsImage, CV_GRAY2RGB);
+//	cv::threshold(cv::Mat(&pImage), keypointsImage, 40, 255, cv::THRESH_BINARY);
+
+
+	img = Mat2QImage(keypointsImage);
+	m_paintWidget->setImg(img);
+}
+
+void FindCircleWin::threadshold()
+{
+	QImage img = m_paintWidget->Img();
+	IplImage pImage = QImage2cvIplImage(img);
+
+	cv::Mat keypointsImage;
+	int ithreadshold = Otsu(&pImage);
+	cv::threshold(cv::Mat(&pImage), keypointsImage, ithreadshold, 255, cv::THRESH_BINARY);
+
+	img = Mat2QImage(keypointsImage);
+	m_paintWidget->setImg(img);
+}
+
+
+void FindCircleWin::findCircleThreadshold()
+{
+	QImage img = m_paintWidget->Img();
+	IplImage pImage = QImage2cvIplImage(img);
+
+	cv::SimpleBlobDetector::Params params;
+	params.filterByArea = true;
+	params.filterByCircularity = true;
+	params.filterByInertia = true;
+	params.filterByConvexity = true;
+	params.filterByColor = false;
+	params.minThreshold = 5;
+	params.thresholdStep = 5;
+	params.minArea = 200;
+	//   params.minConvexity = 0.8f;
+	//   params.minInertiaRatio = 0.73f;
+	//   params.minCircularity = 0.8f;
+	params.minConvexity = 0.82f;
+	params.minInertiaRatio = 0.70f;
+	params.minCircularity = 0.75f;
+	params.maxArea = 10000000000;
+	params.blobColor = 0;
+	params.maxThreshold = 65;
+	params.maxConvexity = 1.2f;
+	params.maxCircularity = 1.2f;
+	params.maxInertiaRatio = 1.2f;
+	params.minDistBetweenBlobs = 1;
+
+	FindCircularMarker f;
+	cv::Mat keypointsImage;
+
+	f.FindCircleByThreadshold(cv::Mat(&pImage), params, centers, FALSE);
+	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
+
+	img = Mat2QImage(keypointsImage);
+
+	m_paintWidget->setImg(img);
+}
+
+void FindCircleWin::batImgHandle()
+{
+	QString fileName;
+	QString openFilePath = "C:/Users/haocheng/Desktop/bmp/";
+	QString saveFilePath = "C:/Users/haocheng/Desktop/10/";
+
+	QFile file(saveFilePath + "result.txt");
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return;
+
+	QTextStream result(&file);
+
+
+	for (int i = 1; i <= 4; i++)
+	{
+		for (int j = 1; j <= 5; j++)
+		{
+			// 做V的
+			fileName = QString("v%1-%2.bmp").arg(i).arg(j);
+			openFile(openFilePath + fileName);
+			findCircleThreadshold();
+			saveFile(saveFilePath + fileName);
+
+			result << (i-1) * 4 + j << ":" << fileName << " " << "\n";
+
+			double av = 0;
+			double errAv = 0;
+
+			// 写文件
+			for (int k = 0; k < (int)centers.size(); k++)
+			{
+				double radius = centers.at(k).radius;
+				double ans = 2 * radius*0.0371660830989318;
+				double err = ans - 10.4;
+				result << radius << " " << ans << " " << err << " " << "\n";
+				av = av + ans;
+				errAv = errAv + abs(err);
+			}
+			result << av / (int)centers.size() << " " << errAv / (int)centers.size() << 0 << "\n";
+
+
+			fileName = QString("h%1-%2.bmp").arg(i).arg(j);
+			openFile(openFilePath + fileName);
+			findCircleThreadshold();
+			saveFile(saveFilePath + fileName);
+
+			av = 0;
+			errAv = 0;
+			result << (i - 1) * 4 + j << ":" << fileName << " " << "\n";
+			for (int k = 0; k < (int)centers.size(); k++)
+			{
+				double radius = centers.at(k).radius;
+				double ans = 2 * radius*0.0371660830989318;
+				double err = ans - 10.4;
+				result << radius << " " << ans << " " << err << " " << "\n";
+				av = av + ans;
+				errAv = errAv + abs(err);
+			}
+			result << av / (int)centers.size() << " " << errAv / (int)centers.size() << 0<<"\n";
+		}
+	}
+
+	// 不好的图片
+  	for (int i = 1; i <= 3; i++)
+  	{
+  		fileName = QString("Error_%1.bmp").arg(i);
+  		openFile(openFilePath + fileName);
+  		findCircleThreadshold();
+  		saveFile(saveFilePath + fileName);
+  
+  		result << i<< fileName << " " << "\n";
+  		for (int k = 0; k < (int)centers.size(); k++)
+  		{
+  			double radius = centers.at(k).radius;
+  			double ans = 2 * radius*0.0371660830989318;
+  			double err = ans - 10.4;
+  			result << radius << " " << ans << " " << err << " " << "\n";
+  		}
+  	}
 }

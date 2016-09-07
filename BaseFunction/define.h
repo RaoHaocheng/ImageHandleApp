@@ -18,11 +18,4 @@
 #define  DLLS_PORT
 #endif
 
-
-
-
-
-
-
-
 #endif // !DEFINE_H

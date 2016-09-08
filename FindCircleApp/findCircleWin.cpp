@@ -445,6 +445,7 @@ void FindCircleWin::autoCanny()
 
 	AutoCanny(cv::Mat(&pImage), dst);
 
+
 	img = Mat2QImage(dst);
 	m_paintWidget->setImg(img);
 

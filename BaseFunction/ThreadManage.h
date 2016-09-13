@@ -4,16 +4,7 @@
 #include "define.h"
 
 
-// 线程当前的状态
-enum ThreadState
-{
-	THREADSTATE_UNSTART = -1,  // 未开始
-	THREADSTATE_TERMINATE = 0, // 终止
-	THREADSTATE_PAUSED = 1,    // 暂停
-	THREADSTATE_SLEEPING = 2,  // 睡眠
-	THREADSTATE_BUSY = 3,      // 忙碌
-	THREADSTATE_AWAITING = 4   // 等候
-};
+
 
 // 任务类
 // 我们发现使用任务类并不方便，我们还是希望使用函数指针完成该功能
@@ -45,6 +36,17 @@ public:
 	bool Exit(unsigned long ExitCode);		 // 退出线程
 	bool Suspend();							 // 挂起线程
 
+	// 线程当前的状态
+	enum ThreadState
+	{
+		THREADSTATE_UNSTART = -1,  // 未开始
+		THREADSTATE_TERMINATE = 0, // 终止
+		THREADSTATE_PAUSED = 1,    // 暂停
+		THREADSTATE_SLEEPING = 2,  // 睡眠
+		THREADSTATE_BUSY = 3,      // 忙碌
+		THREADSTATE_AWAITING = 4   // 等候
+	};
+
 	inline ThreadState CurrentStatus() { return m_threadState; } //　返回当前的工作状态
 	
 protected:
@@ -61,13 +63,6 @@ private:
 	Task  m_task;              // 本线程需要执行的任务号
 };
 
-// 线程池类
-// typedef struct DLLS_PORT ThreadID
-// {
-// 	Thread thread;
-// } ST_THREAD_ID, *PST_THREAD_ID;                                          // 对应的线程和对应的id绑定在一起
-// 使用模板类的导出工作
-//template class DLLS_PORT std::vector<ST_THREAD_ID>;
 typedef struct _ST_THD_INFO
 {
 	void* worker;               // 对应线程的指针

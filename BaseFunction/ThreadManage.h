@@ -3,18 +3,6 @@
 // 线程池
 #include "define.h"
 
-
-
-
-// 任务类
-// 我们发现使用任务类并不方便，我们还是希望使用函数指针完成该功能
-// class DLLS_PORT Task
-// {
-// public:
-// 	virtual ~Task() {};
-// 	virtual void Run() = 0;
-// };
-
 // 定义的函数类型
 typedef int (*Task)(void*);
 

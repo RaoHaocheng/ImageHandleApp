@@ -6,6 +6,17 @@
 // 定义的函数类型
 typedef int (*Task)(void*);
 
+// 线程当前的状态
+enum ThreadState
+{
+	THREADSTATE_UNSTART = -1,  // 未开始
+	THREADSTATE_TERMINATE = 0, // 终止
+	THREADSTATE_PAUSED = 1,    // 暂停
+	THREADSTATE_SLEEPING = 2,  // 睡眠
+	THREADSTATE_BUSY = 3,      // 忙碌
+	THREADSTATE_AWAITING = 4   // 等候
+};
+
 // 线程类
 class DLLS_PORT Thread
 {
@@ -23,17 +34,6 @@ public:
 	bool Resume();							 // 恢复线程
 	bool Exit(unsigned long ExitCode);		 // 退出线程
 	bool Suspend();							 // 挂起线程
-
-	// 线程当前的状态
-	enum ThreadState
-	{
-		THREADSTATE_UNSTART = -1,  // 未开始
-		THREADSTATE_TERMINATE = 0, // 终止
-		THREADSTATE_PAUSED = 1,    // 暂停
-		THREADSTATE_SLEEPING = 2,  // 睡眠
-		THREADSTATE_BUSY = 3,      // 忙碌
-		THREADSTATE_AWAITING = 4   // 等候
-	};
 
 	inline ThreadState CurrentStatus() { return m_threadState; } //　返回当前的工作状态
 	
@@ -66,9 +66,9 @@ class DLLS_PORT ThreadManage
 {
 // 为了只让给类在一个函数中只能生成一个实例
 public:
-	static ThreadManage* CreateInstance(int minThreadNum,int maxThreadNum);// 外部使用该静态函数创建该类实例
-	static void DeleteInstance();						   // 销毁该类实例
-	bool Execute(Task task);                               // 使用id，激活对应的线程
+	static ThreadManage* CreateInstance(int minThreadNum,int maxThreadNum);  // 外部使用该静态函数创建该类实例
+	static void DeleteInstance();						                     // 销毁该类实例
+	bool Execute(Task task);                                                 // 使用id，激活对应的线程
 
 private:
 	explicit ThreadManage(int minThreadNum, int maxThreadNum);

@@ -6,6 +6,7 @@
 // 定义的函数类型
 typedef int (*Task)(void*);
 
+int x;
 // 线程当前的状态
 enum ThreadState
 {

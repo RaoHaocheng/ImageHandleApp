@@ -65,25 +65,7 @@ FindCircleWin::~FindCircleWin()
 ***************************************************************************/
 void FindCircleWin::openFile(const QString &path)
 {
-	QString fileName;
-	if (path.isNull())
-		fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开图片文件"),
-		m_currentPath, "Image files (*.jpg *.bmp *.png)");
-	else
-		fileName = path;
-
-	if (!fileName.isEmpty()) {
-		QFile file(fileName);
-		if (!file.exists()) {
-			QMessageBox::critical(this, QStringLiteral("打开图片文件"),
-				QStringLiteral("打开图片文件") +
-				QString("'%1'").arg(fileName) + QStringLiteral("失败！"));
-			return;
-		}
-
-		QImage img(fileName);
-		m_paintWidget->setImg(img);
-	}
+	openImgFile(path);
 }
 
 /***************************************************************************
@@ -99,25 +81,7 @@ void FindCircleWin::openFile(const QString &path)
 ***************************************************************************/
 void FindCircleWin::saveFile(const QString &path)
 {
-	QString fileName;
-	if (path.isNull())
-		fileName = QFileDialog::getSaveFileName(this, QStringLiteral("保存图片文件"),
-		m_currentPath, "Image files (*.jpg *.bmp *.png)");
-	else
-		fileName = path;
-
-	if (!fileName.isEmpty()) {
-		QFile file(fileName);
-		if (file.exists()) {
-			QMessageBox::critical(this, QStringLiteral("保存图片文件"),
-				QStringLiteral("保存图片文件") +
-				QString("'%1'").arg(fileName) + QStringLiteral("失败！"));
-			return;
-		}
-
-		QImage img = m_paintWidget->Img();
-		img.save(fileName);
-	}
+	saveImgFile(path);
 }
 
 /***************************************************************************
@@ -190,28 +154,34 @@ void FindCircleWin::iniUi()
 	// 初始化找圆方法函数
 	QMenu *findCircleMenu = new QMenu(QStringLiteral("圆形定位方法"), this);
 	QAction *CICAction = findCircleMenu->addAction(QStringLiteral("CIC"));
-	QAction *EDPFAction = findCircleMenu->addAction(QStringLiteral("iTCiD"));
+	QAction *iTCiDAction = findCircleMenu->addAction(QStringLiteral("iTCiD"));
 	QAction *findCircleThresholdAction = findCircleMenu->addAction(QStringLiteral("threshold"));
 
 	menuBar()->addMenu(findCircleMenu);
 	connect(CICAction, SIGNAL(triggered()), this, SLOT(findCircleCIC()));
-	connect(EDPFAction, SIGNAL(triggered()), this, SLOT(findCircleEDPF()));
+	connect(iTCiDAction, SIGNAL(triggered()), this, SLOT(findCircleiTCiD()));
 	connect(findCircleThresholdAction, SIGNAL(triggered()), this, SLOT(findCircleThreadshold()));
 
 	// 图像处理
 	QMenu *imgHandleMenu = new QMenu(QStringLiteral("图片处理方法"), this);
 	QAction *gaussianAction = imgHandleMenu->addAction(QStringLiteral("高斯噪声"));
 	QAction *autoCannyAction = imgHandleMenu->addAction(QStringLiteral("自动化Canny"));
+	QAction *batCannyAction = imgHandleMenu->addAction(QStringLiteral("Canny批处理"));
 	QAction *drawCircleAction = imgHandleMenu->addAction(QStringLiteral("画圆"));
 	QAction *thresholdAction = imgHandleMenu->addAction(QStringLiteral("阈值分割"));
 	QAction *batAction = imgHandleMenu->addAction(QStringLiteral("批处理"));
-
+	QAction *edpfAction = imgHandleMenu->addAction(QStringLiteral("edpf"));
+	QAction *batEdpfAction = imgHandleMenu->addAction(QStringLiteral("edpf批处理"));
+	
 	menuBar()->addMenu(imgHandleMenu);
 	connect(gaussianAction, SIGNAL(triggered()), this, SLOT(addGaussianNoise()));
 	connect(autoCannyAction, SIGNAL(triggered()), this, SLOT(autoCanny()));
 	connect(drawCircleAction, SIGNAL(triggered()), this, SLOT(drawCircle()));
 	connect(thresholdAction, SIGNAL(triggered()), this, SLOT(threadshold()));
 	connect(batAction, SIGNAL(triggered()), this, SLOT(batImgHandle()));
+	connect(batCannyAction, SIGNAL(triggered()), this, SLOT(batCannyImgHandle()));
+	connect(edpfAction, SIGNAL(triggered()), this, SLOT(edpf()));
+	connect(batEdpfAction, SIGNAL(triggered()), this, SLOT(batEdpf()));
 }
 
 /***************************************************************************
@@ -224,27 +194,20 @@ void FindCircleWin::iniUi()
 *  [日期]     [作者/修改者]  [修改原因]
 *2016/07/28      饶智博        添加
 ***************************************************************************/
-void FindCircleWin::findCircleEDPF()
+void FindCircleWin::findCircleiTCiD()
 {
-// 	FindContoursMethod f;
-// 	QImage img = m_paintWidget->Img();
-// 	IplImage pImage = QImage2cvIplImage(img);
-// 	cv::Mat dst;
-	//f.findContoursByEDPF(&pImage, dst);
-
-
-	QImage img = m_paintWidget->Img();
-	IplImage pImage = QImage2cvIplImage(img);
-
-	FindCircularMarker f;
-	cv::Mat keypointsImage;
-	std::vector<ST_CENTER> centers;
-
-	f.FindCircleBySamplingTriangles(&pImage, centers, false);
-	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
-
-	img = Mat2QImage(keypointsImage);
-	m_paintWidget->setImg(img);
+  	QImage img = m_paintWidget->Img();
+  	IplImage pImage = QImage2cvIplImage(img);
+  
+  	FindCircularMarker f;
+  	cv::Mat keypointsImage;
+  	std::vector<ST_CENTER> centers;
+  
+  	f.FindCircleBySamplingTriangles(&pImage, centers, false);
+  	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
+  
+  	img = Mat2QImage(keypointsImage);
+  	m_paintWidget->setImg(img);
 }
 
 
@@ -275,33 +238,25 @@ void FindCircleWin::findCircleCIC()
 //    	params.minConvexity = 0.8f;
 //    	params.minInertiaRatio = 0.73f;
 //    	params.minCircularity = 0.8f;
- 	params.minConvexity = 0.82f;
- 	params.minInertiaRatio = 0.70f;
- 	params.minCircularity = 0.75f;
+ 	params.minConvexity = 0.78f;
+ 	params.minInertiaRatio = 0.6f;
+ 	params.minCircularity = 0.8f;
  	params.maxArea = 10000000000;
  	params.blobColor = 0;
  	params.maxThreshold = 65;
  	params.maxConvexity = 1.2f;
  	params.maxCircularity = 1.2f;
  	params.maxInertiaRatio = 1.2f;
-	params.minDistBetweenBlobs = 1; 
+	params.minDistBetweenBlobs = 2; 
 
 	FindCircularMarker f;
 	cv::Mat keypointsImage;
 	
-
-	f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, false);
+	//f.FindCircle(cv::Mat(&pImage), params, centers);
+	//f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, 1.0, false);
+	f.FindCircleByCIC(cv::Mat(&pImage), params, centers, 1.0, false);
 	//f.FindCircleByThreshold(cv::Mat(&pImage), params, centers, false);
 	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
-
-// 	cvtColor(cv::Mat(&pImage), keypointsImage, CV_GRAY2RGB);
-// 	for (int j = 0; j < (int)centers.size(); j++)
-// 	{
-// 		ST_CENTER center;
-// 		center = centers.at(j);
-// 		cv::circle(keypointsImage, center.location, (int)center.radius, cv::Scalar(0, 0, 255)); // 画一个圆 
-// 		cv::circle(keypointsImage, center.location, (int)1, cv::Scalar(0, 255, 255)); // 画一个圆 
-// 	}
 
 	img = Mat2QImage(keypointsImage);
 	m_paintWidget->setImg(img);
@@ -445,7 +400,6 @@ void FindCircleWin::autoCanny()
 
 	AutoCanny(cv::Mat(&pImage), dst);
 
-
 	img = Mat2QImage(dst);
 	m_paintWidget->setImg(img);
 
@@ -476,6 +430,16 @@ void FindCircleWin::drawCircle()
 	m_paintWidget->setImg(img);
 }
 
+/***************************************************************************
+* 函数名称：   threadshold
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/10/12      饶智博        添加
+***************************************************************************/
 void FindCircleWin::threadshold()
 {
 	QImage img = m_paintWidget->Img();
@@ -490,6 +454,16 @@ void FindCircleWin::threadshold()
 }
 
 
+/***************************************************************************
+* 函数名称：   findCircleThreadshold
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/02      饶智博        添加
+***************************************************************************/
 void FindCircleWin::findCircleThreadshold()
 {
 	QImage img = m_paintWidget->Img();
@@ -529,6 +503,16 @@ void FindCircleWin::findCircleThreadshold()
 	m_paintWidget->setImg(img);
 }
 
+/***************************************************************************
+* 函数名称：   batImgHandle
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/10/12      饶智博        添加
+***************************************************************************/
 void FindCircleWin::batImgHandle()
 {
 	QString fileName;
@@ -608,4 +592,160 @@ void FindCircleWin::batImgHandle()
   			result << radius << " " << ans << " " << err << " " << "\n";
   		}
   	}
+}
+
+/***************************************************************************
+* 函数名称：   batCannyImgHandle
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/02      饶智博        添加
+***************************************************************************/
+void FindCircleWin::batCannyImgHandle()
+{
+	QString fileName;
+	QString openFilePath = "C:/Users/haocheng/Desktop/source/";
+	QString saveFilePath = "C:/Users/haocheng/Desktop/result/";
+
+	for (int i = 1; i <= 300; i++)
+	{
+		// 做V的
+		fileName = QString("(%1).jpg").arg(i);
+		openFile(openFilePath + fileName);
+		autoCanny();
+		saveFile(saveFilePath + fileName);
+	}
+}
+
+
+/***************************************************************************
+* 函数名称：   batEdpf
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/02      饶智博        添加
+***************************************************************************/
+void FindCircleWin::batEdpf()
+{
+	QString fileName;
+	QString openFilePath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/source/";//"C:/Users/haocheng/Desktop/source/";
+	QString saveFilePath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/result/";
+
+	for (int i = 1;; i++)
+	{
+		// 做V的
+		fileName = QString("(%1).jpg").arg(i);
+ 		if (!openImgFile(openFilePath + fileName))
+ 			break;
+		
+		edpf();
+		saveImgFile(saveFilePath + fileName);
+	}
+}
+
+
+/***************************************************************************
+* 函数名称：   edpf
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/02      饶智博        添加
+***************************************************************************/
+void FindCircleWin::edpf()
+{
+ 	FindContoursMethod f;
+	QImage img = m_paintWidget->Img();
+	//IplImage pImage = QImage2cvIplImage(img);
+	cv::Mat src = QImage2Mat(img);
+
+	cv::Mat dst;
+	f.findContoursByEDPF(src, dst, 1.0);
+	//f.findContoursByED(&pImage, dst);
+
+	img = Mat2QImage(dst);
+	m_paintWidget->setImg(img);
+}
+
+/***************************************************************************
+* 函数名称：   openImgFile
+* 摘　　要：   
+* 全局影响：   protected 
+* 参　　数：   [in]  const QString & path
+* 返回值　：   bool
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/02      饶智博        添加
+***************************************************************************/
+bool FindCircleWin::openImgFile(const QString &path /* = QString() */)
+{
+	QString fileName;
+	if (path.isNull())
+		fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开图片文件"),
+		m_currentPath, "Image files (*.jpg *.bmp *.png)");
+	else
+		fileName = path;
+
+	if (!fileName.isEmpty()) {
+		QFile file(fileName);
+		if (!file.exists()) {
+			QMessageBox::critical(this, QStringLiteral("打开图片文件"),
+				QStringLiteral("打开图片文件") +
+				QString("'%1'").arg(fileName) + QStringLiteral("失败！"));
+			return false;
+		}
+
+		m_currentPath = fileName;
+		QImage img(fileName);
+		m_paintWidget->setImg(img);
+		return true;
+	}
+ 	else
+ 		return false;
+}
+
+/***************************************************************************
+* 函数名称：   saveImgFile
+* 摘　　要：   
+* 全局影响：   protected 
+* 参　　数：   [in]  const QString & path
+* 返回值　：   bool
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/02      饶智博        添加
+***************************************************************************/
+bool FindCircleWin::saveImgFile(const QString &path /* = QString() */)
+{
+	QString fileName;
+	if (path.isNull())
+		fileName = QFileDialog::getSaveFileName(this, QStringLiteral("保存图片文件"),
+		m_currentPath, "Image files (*.jpg *.bmp *.png)");
+	else
+		fileName = path;
+
+	if (!fileName.isEmpty()) {
+		QFile file(fileName);
+		if (file.exists()) {
+			QMessageBox::critical(this, QStringLiteral("保存图片文件"),
+				QStringLiteral("保存图片文件") +
+				QString("'%1'").arg(fileName) + QStringLiteral("失败！"));
+			return false;
+		}
+
+		QImage img = m_paintWidget->Img();
+		img.save(fileName);
+		return true;
+	}
+
+	return false;
 }

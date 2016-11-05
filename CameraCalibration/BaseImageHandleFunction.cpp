@@ -1098,12 +1098,15 @@ DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst)
 	IplImage* pImage = &IplImage(src_gray);
 	IplImage* pCannyImage = cvCreateImage(cvGetSize(pImage), IPL_DEPTH_8U, 1);
 
-	blur(cv::Mat(pImage), cv::Mat(pCannyImage), cv::Size(3, 3));
+//	blur(cv::Mat(pImage), cv::Mat(pCannyImage), cv::Size(3, 3));
 	// 使用Otsu计算出阈值
 	int cannyThreshold = Otsu(pImage);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.2 , 3);
+//	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.2 , 3);
 //	cvCanny(pImage, pCannyImage, 40, 100, 3);
+
+
+	cvCanny(pImage, pCannyImage, cannyThreshold*0.1, cannyThreshold, 3);
 
 // 	double low, high;
 // 	AdaptiveFindThreshold(pImage, &low, &high);

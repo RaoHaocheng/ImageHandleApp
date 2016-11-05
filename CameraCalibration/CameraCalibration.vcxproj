@@ -22,6 +22,8 @@
     <ClInclude Include="BaseImageHandleFunction.h" />
     <ClInclude Include="CameraCalibration.h" />
     <ClInclude Include="define.h" />
+    <ClInclude Include="EdgeMap.h" />
+    <ClInclude Include="EDLib.h" />
     <ClInclude Include="FindCircularMarker.h" />
     <ClInclude Include="FindCountersMethod.h" />
   </ItemGroup>

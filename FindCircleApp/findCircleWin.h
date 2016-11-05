@@ -29,6 +29,8 @@ private:
 
 protected slots:
 	void checkSize(QSize);
+	bool openImgFile(const QString &path = QString());
+	bool saveImgFile(const QString &path = QString());
 
 private slots:
 	void openFile(const QString &path = QString());
@@ -36,14 +38,18 @@ private slots:
 	void clearImg();
 	void findCircleCIC();
 	void findCircleThreadshold();
-	void findCircleEDPF();
+	void findCircleiTCiD();
 	void changeHScrollVaule(int);
 	void changeVScrollVaule(int);
 	void addGaussianNoise();
 	void autoCanny();
 	void drawCircle();
 	void threadshold();
-	void batImgHandle();      // 需要修改，目前该功能仅用于测试
+	void batImgHandle();		   // 需要修改，目前该功能仅用于测试
+	void batCannyImgHandle();      // 需要修改，目前该功能仅用于测试
+	void edpf();
+	void batEdpf();                // FIXME：need more para;
+
 
 private:
 

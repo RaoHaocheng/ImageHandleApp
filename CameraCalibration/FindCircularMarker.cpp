@@ -1,4 +1,5 @@
 #include "FindCircularMarker.h"
+#include "FindCountersMethod.h"
 
 int FindCircularMarker::m_siGobalThreHold = 0;
 
@@ -298,8 +299,14 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 	vct_ponits.clear();
 	std::vector < std::vector<cv::Point> > contours; // 轮廓标记点存储的位置
 	cv::Mat keypointsImage;
+	cv::Mat src_gray;                          // 灰度图   
 
-	cvtColor(cvMatimage, keypointsImage, CV_GRAY2RGB);
+	if (CV_8UC1 != cvMatimage.type())
+		cvtColor(cvMatimage, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatimage.clone();
+
+	cvtColor(src_gray, keypointsImage, CV_GRAY2RGB);
 
 	/************************************************************************/
 	/* 计算轮廓                                                                */
@@ -312,7 +319,7 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 //	std::vector<cv::Vec4i> hierarchy;
 	//CvMemStorage * storage = cvCreateMemStorage(0);
 	// 找轮廓， 输入的Mat必须是二值化后的图片，否则会出现问题
-	findContours(cvMatimage, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+	findContours(src_gray, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 	//findContours(cvMatimage, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 	//canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0)
 
@@ -535,7 +542,7 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 
 		if (params.filterByColor)
 		{
-			if (cvMatimage.at<uchar>(cvRound(center.location.y), cvRound(center.location.x)) != params.blobColor)
+			if (src_gray.at<uchar>(cvRound(center.location.y), cvRound(center.location.x)) != params.blobColor)
 				continue;
 		}
 
@@ -568,11 +575,11 @@ BOOL FindCircularMarker::FindCircle(cv::Mat& cvMatimage, cv::SimpleBlobDetector:
 		else
 			continue;
 
- 		if (center.location.x > 800 && center.location.x<920 && center.location.y>400 && center.location.y < 500)
- 		{
- 			int x = 0;
- 			x++;
- 		}
+//  		if (center.location.x > 800 && center.location.x<920 && center.location.y>400 && center.location.y < 500)
+//  		{
+//  			int x = 0;
+//  			x++;
+//  		}
 
 
 		// 显示图片
@@ -1146,7 +1153,7 @@ void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
 	// 使用Otsu计算出阈值
 	int cannyThreshold = Otsu(pImage);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.5 , 3);
+	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold , 3);
 //  	double low,high;
 //  	AdaptiveFindThreshold(pImage, &low, &high);
 // 	cvCanny(pImage, pCannyImage, low, high, 3);
@@ -1189,54 +1196,169 @@ BOOL FindCircularMarker::FindCircleImproved(cv::Mat& cvMatimage,
 											std::vector<ST_CENTER>& vct_ponits, 
 											BOOL bShow /* = FALSE */)
 {
+	// 初始化需要使用的变量
 	vct_ponits.clear();
-	cv::Mat cvMatTemImg = cvMatimage.clone();
+	std::vector < std::vector<cv::Point> > contours; // 轮廓标记点存储的位置
 	cv::Mat keypointsImage;
-	cvtColor(cvMatimage, keypointsImage, CV_GRAY2RGB);
+	cv::Mat src_gray;                               // 灰度图   
 
-	// 存储内容
-	CvMemStorage* contoursStorge = cvCreateMemStorage(0);
-	CvMemStorage* approxPolyStorge = cvCreateMemStorage(0);
+	// 我们只能做灰度图，所以把不是灰度图的转换成灰度图
+	if (CV_8UC1 != cvMatimage.type())
+		cvtColor(cvMatimage, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatimage.clone();
+	cvtColor(src_gray, keypointsImage, CV_GRAY2RGB);
 
-	CvSeq* contours = 0;
-	CvSeq* approxPloy = NULL;
+	// 查找轮廓
+	findContours(src_gray, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
-	// 原因是后面的信息都是在上面使用
-	IplImage* temImg = &IplImage(cvMatTemImg);
-	IplImage* contoursImg = cvCreateImage(cvGetSize(temImg), temImg->depth, temImg->nChannels);
-	IplImage* approxPloyImg = cvCreateImage(cvGetSize(temImg), temImg->depth, temImg->nChannels);
-	cvZero(contoursImg);
-	cvZero(approxPloyImg);
-	
-	// 找轮廓
-	cvFindContours(temImg, contoursStorge, &contours, sizeof(CvContour), CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	// 初始化结果的空间
+	ST_CENTER center;
+	center.confidence = 1;
 
-	if (bShow)
+	// 对圆进行识别和定位
+	for (size_t contourIdx = 0; contourIdx < contours.size(); contourIdx++)
 	{
-		cvDrawContours(contoursImg, contours, CV_RGB(0, 0, 255), CV_RGB(255, 0, 0), 2, 1, 8, cvPoint(0, 0));
-		cvShowImage("Contours Img", contoursImg);
-	}
+		// 清理结果空间
+		ZeroMemory(&center, sizeof(ST_CENTER));
+		
+		// 计算当前的图形的集合矩
+		cv::Moments moms = cv::moments(cv::Mat(contours[contourIdx]), true);
 
-	for (CvSeq* contour = contours; contour != 0; contour = contour->h_next)
-	{
-		//多边形逼近  
-		approxPloy = cvApproxPoly(contour, sizeof(CvContour), approxPolyStorge, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
-		cvDrawContours(approxPloyImg, approxPloy, CV_RGB(255, 0, 0), CV_RGB(0, 0, 100), 1, 2, 8, cvPoint(0, 0));
+		// 通过面积虑除不要的面积的轮廓，一般来说，我们是不设定该数据的最大值，因为会影响圆定位的精度
+		if (params.filterByArea){
+			double area = moms.m00;
+			if (area < params.minArea || area >= params.maxArea)
+				continue;
+		}
 
-	}
+		// 圆度计算
+		if (params.filterByCircularity){
+			double ratio = moms.m00 * moms.m00 / (2 * CV_PI*(moms.mu02 + moms.mu20));
+			if (ratio < params.minCircularity || ratio >= params.maxCircularity)
+				continue;
+		}
 
-	if (bShow)
-	{
-		cvShowImage("Contour", approxPloyImg);
-		cvWaitKey(0);
+		// 惯性率计算
+		if (params.filterByInertia)
+		{
+			double denominator = sqrt(pow(2 * moms.mu11, 2) + pow(moms.mu20 - moms.mu02, 2));
+			const double eps = 1e-2;
+			double ratio;
+			if (denominator > eps)
+			{
+				double cosmin = (moms.mu20 - moms.mu02) / denominator;
+				double sinmin = 2 * moms.mu11 / denominator;
+				double cosmax = -cosmin;
+				double sinmax = -sinmin;
+
+				double imin = 0.5 * (moms.mu20 + moms.mu02) - 0.5 * (moms.mu20 - moms.mu02) * cosmin - moms.mu11 * sinmin;
+				double imax = 0.5 * (moms.mu20 + moms.mu02) - 0.5 * (moms.mu20 - moms.mu02) * cosmax - moms.mu11 * sinmax;
+				ratio = imin / imax;
+			}
+			else
+			{
+				ratio = 1;
+			}
+
+			if (ratio < params.minInertiaRatio || ratio >= params.maxInertiaRatio)
+				continue;
+
+			center.confidence = ratio * ratio;
+		}
+
+		// 计算圆形坐标和半径
+		center.location = cv::Point2d(moms.m10 / moms.m00, moms.m01 / moms.m00);
+
+		// 通过颜色去排除非圆轮廓，但是一般并不使用
+		if (params.filterByColor)
+		{
+			if (src_gray.at<uchar>(cvRound(center.location.y), cvRound(center.location.x)) != params.blobColor)
+				continue;
+		}
+
+		// 计算半径，使用的方法是求取中位数的方式
+		std::vector<double> dists;
+		for (size_t pointIdx = 0; pointIdx < contours[contourIdx].size(); pointIdx++)
+		{
+			cv::Point2d pt = contours[contourIdx][pointIdx];
+			dists.push_back(norm(center.location - pt));
+		}
+		// 重新排列数据
+		std::sort(dists.begin(), dists.end());
+		center.radius = (dists[(dists.size() - 1) / 2] + dists[dists.size() / 2]) / 2.;
+
+		// 看一下是否是新的内容
+		BOOL bIsNew = TRUE;
+		if (vct_ponits.size()){
+			double dist = norm(vct_ponits.at(vct_ponits.size() - 1).location - center.location);
+			double disr = vct_ponits.at(vct_ponits.size() - 1).radius - center.radius;
+			bIsNew = dist >= params.minDistBetweenBlobs || vct_ponits.at(vct_ponits.size() - 1).radius - center.radius >= params.minDistBetweenBlobs;
+		}
+
+		// 是的话就加入进去
+		if (bIsNew)
+			vct_ponits.push_back(center);                    // 加入到容器中去
+		else
+			continue;
+
+		// 显示图片
+		if (bShow)
+		{
+			cv::circle(keypointsImage, center.location, (int)center.radius, cv::Scalar(0, 0, 255)); // 画一个圆 
+			cv::circle(keypointsImage, center.location, (int)1, cv::Scalar(0, 255, 255)); // 画一个圆 
+		}
 	}
-	// 删除内容荣
-	cvReleaseMemStorage(&contoursStorge);
-	cvReleaseMemStorage(&approxPolyStorge);
-	cvReleaseImage(&contoursImg);
-	cvReleaseImage(&approxPloyImg);
 
 	return TRUE;
+// 	vct_ponits.clear();
+// 	cv::Mat cvMatTemImg = cvMatimage.clone();
+// 	cv::Mat keypointsImage;
+// 	cvtColor(cvMatimage, keypointsImage, CV_GRAY2RGB);
+// 
+// 	// 存储内容
+// 	CvMemStorage* contoursStorge = cvCreateMemStorage(0);
+// 	CvMemStorage* approxPolyStorge = cvCreateMemStorage(0);
+// 
+// 	CvSeq* contours = 0;
+// 	CvSeq* approxPloy = NULL;
+// 
+// 	// 原因是后面的信息都是在上面使用
+// 	IplImage* temImg = &IplImage(cvMatTemImg);
+// 	IplImage* contoursImg = cvCreateImage(cvGetSize(temImg), temImg->depth, temImg->nChannels);
+// 	IplImage* approxPloyImg = cvCreateImage(cvGetSize(temImg), temImg->depth, temImg->nChannels);
+// 	cvZero(contoursImg);
+// 	cvZero(approxPloyImg);
+// 	
+// 	// 找轮廓
+// 	cvFindContours(temImg, contoursStorge, &contours, sizeof(CvContour), CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+// 
+// 	if (bShow)
+// 	{
+// 		cvDrawContours(contoursImg, contours, CV_RGB(0, 0, 255), CV_RGB(255, 0, 0), 2, 1, 8, cvPoint(0, 0));
+// 		cvShowImage("Contours Img", contoursImg);
+// 	}
+// 
+// 	for (CvSeq* contour = contours; contour != 0; contour = contour->h_next)
+// 	{
+// 		//多边形逼近  
+// 		approxPloy = cvApproxPoly(contour, sizeof(CvContour), approxPolyStorge, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
+// 		cvDrawContours(approxPloyImg, approxPloy, CV_RGB(255, 0, 0), CV_RGB(0, 0, 100), 1, 2, 8, cvPoint(0, 0));
+// 
+// 	}
+// 
+// 	if (bShow)
+// 	{
+// 		cvShowImage("Contour", approxPloyImg);
+// 		cvWaitKey(0);
+// 	}
+// 	// 删除内容荣
+// 	cvReleaseMemStorage(&contoursStorge);
+// 	cvReleaseMemStorage(&approxPolyStorge);
+// 	cvReleaseImage(&contoursImg);
+// 	cvReleaseImage(&approxPloyImg);
+
+	// 使用改进型的算法，以便提高算法的执行速度与检测效率
 }
 
 
@@ -1344,6 +1466,19 @@ void FindCircularMarker::FindCircleByThreadshold(const cv::Mat& cvMatImage,
 #endif // TIME_TEST
 }
 
+/***************************************************************************
+* 函数名称：   CheckReliability
+* 摘　　要：   
+* 全局影响：   private 
+* 参　　数：   [in]  const std::vector<double> src
+* 参　　数：   [in]  const double dbVarPrecision
+* 参　　数：   [in]  const double dbRaPrecision
+* 返回值　：   BOOL
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/04      饶智博        添加
+***************************************************************************/
 BOOL FindCircularMarker::CheckReliability(const std::vector<double> src, 
 										  const double dbVarPrecision /* = 0.3 */, 
 										  const double dbRaPrecision /* = 0.7 */)
@@ -1442,4 +1577,101 @@ void FindCircularMarker::FindCircleByWaterThed(const cv::Mat& cvMatImage,
 #endif // TIME_TEST
 
 	cvReleaseImage(&pCannyImage);
+}
+
+
+/***************************************************************************
+* 函数名称：   FindCircleByCICImproved
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Mat & cvMatImage
+* 参　　数：   [in]  cv::SimpleBlobDetector::Params params
+* 参　　数：   [in]  std::vector<ST_CENTER> & vct_ponits
+* 参　　数：   [in]  double smoothingSigma
+* 参　　数：   [in]  BOOL bShow
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/10/12      饶智博        添加
+***************************************************************************/
+void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
+	cv::SimpleBlobDetector::Params params, std::vector<ST_CENTER>& vct_ponits, double smoothingSigma , BOOL bShow /* = FALSE */)
+{
+	vct_ponits.clear();
+	// 新建一个数据缓存区域
+	cv::Mat cvMatTemImg = cvMatImage.clone();  // 复制图片，以免出现问题
+	cv::Mat src_gray;                          // 灰度图   
+
+	if (CV_8UC1 != cvMatImage.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatTemImg.clone();
+
+	// 使用EDPF找边界
+	FindContoursMethod f;
+	cv::Mat dst;
+	f.findContoursByEDPF(src_gray, dst, smoothingSigma);
+	f.findContoursByEDPF(dst, dst, smoothingSigma);
+
+	// 看是否要显示出图片
+	if (bShow){
+		const char* windows_name = "canny";
+		cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
+		imshow(windows_name, dst);
+		cvWaitKey(0);
+	}
+
+	FindCircle(dst, params, vct_ponits, bShow);
+}
+
+
+/***************************************************************************
+* 函数名称：   FindCircleByCIC
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Mat & cvMatImage
+* 参　　数：   [in]  cv::SimpleBlobDetector::Params params
+* 参　　数：   [in]  std::vector<ST_CENTER> & vct_ponits
+* 参　　数：   [in]  double smoothingSigma
+* 参　　数：   [in]  BOOL bShow
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/11/04      饶智博        添加
+***************************************************************************/
+void FindCircularMarker::FindCircleByCIC(const cv::Mat& cvMatImage,
+	cv::SimpleBlobDetector::Params params,
+	std::vector<ST_CENTER>& vct_ponits,
+	double smoothingSigma /* = 1.0 */,
+	BOOL bShow /* = FALSE */)
+{
+	vct_ponits.clear();
+	// 新建一个数据缓存区域
+	cv::Mat cvMatTemImg = cvMatImage.clone();  // 复制图片，以免出现问题
+	cv::Mat src_gray;                          // 灰度图   
+
+	if (CV_8UC1 != cvMatImage.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatTemImg.clone();
+
+	// 使用EDPF找边界
+	FindContoursMethod f;
+	cv::Mat dst;
+	f.findContoursByEDPF(src_gray, dst, smoothingSigma);
+	//f.findContoursByEDPF(dst, dst, smoothingSigma);
+
+	// 看是否要显示出图片
+	if (bShow){
+		const char* windows_name = "EDPF";
+		cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
+		imshow(windows_name, dst);
+		cvWaitKey(0);
+	}
+
+	// 调用改进型算法完成该内容
+	//FindCircleImproved(dst, params, vct_ponits, bShow);
+	FindCircle(dst, params, vct_ponits, bShow);
 }

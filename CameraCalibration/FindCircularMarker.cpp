@@ -665,7 +665,7 @@ void FindCircularMarker::FindCircleBySamplingTriangles(const cv::Mat& cvMatimage
 	int cannyThreshold = Otsu(&IplImage(cvMatTemImg));
 	IplImage* pCannyImage = cvCreateImage(cvGetSize(&IplImage(cvMatTemImg)), IPL_DEPTH_8U, 1);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-	cvCanny(&IplImage(cvMatTemImg), pCannyImage, cannyThreshold, cannyThreshold * 2, 3);
+	cvCanny(&IplImage(cvMatTemImg), pCannyImage, cannyThreshold*0.5, cannyThreshold * 1.2, 3);
 	cv::Mat grad(pCannyImage);
 	//imshow("ContourImg", grad);
 	//cvWaitKey(0);
@@ -1612,7 +1612,7 @@ void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
 	FindContoursMethod f;
 	cv::Mat dst;
 	f.findContoursByEDPF(src_gray, dst, smoothingSigma);
-	f.findContoursByEDPF(dst, dst, smoothingSigma);
+//	f.findContoursByEDPF(dst, dst, smoothingSigma);
 
 	// 看是否要显示出图片
 	if (bShow){

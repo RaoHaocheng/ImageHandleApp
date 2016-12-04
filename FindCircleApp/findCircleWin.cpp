@@ -4,6 +4,8 @@
 #include <QtWidgets>
 #include <QImage>
 #include <vector>
+#include "../Communications/communications.h"
+#pragma comment(lib,"communications.lib")
 
 
 /***************************************************************************
@@ -151,6 +153,14 @@ void FindCircleWin::iniUi()
 	connect(clearImgAction, SIGNAL(triggered()), this, SLOT(clearImg()));
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+	// 基本的功能，比如返回上一步和下一步
+	QMenu *operatorMenu = new QMenu(QStringLiteral("图片操作"), this);
+	QAction *goBackAction = operatorMenu->addAction(QStringLiteral("撤销"));
+	QAction *goFrontAction = operatorMenu->addAction(QStringLiteral("向后"));
+	menuBar()->addMenu(operatorMenu);
+	connect(goBackAction, SIGNAL(triggered()), this, SLOT(goBack()));
+	connect(goFrontAction, SIGNAL(triggered()), this, SLOT(goFront()));
+
 	// 初始化找圆方法函数
 	QMenu *findCircleMenu = new QMenu(QStringLiteral("圆形定位方法"), this);
 	QAction *CICAction = findCircleMenu->addAction(QStringLiteral("CIC"));
@@ -182,6 +192,41 @@ void FindCircleWin::iniUi()
 	connect(batCannyAction, SIGNAL(triggered()), this, SLOT(batCannyImgHandle()));
 	connect(edpfAction, SIGNAL(triggered()), this, SLOT(edpf()));
 	connect(batEdpfAction, SIGNAL(triggered()), this, SLOT(batEdpf()));
+
+	// 测试按钮
+	QMenu *testMenu = new QMenu(QStringLiteral("测试"), this);
+	QAction *testAction = testMenu->addAction(QStringLiteral("测试"));
+
+	menuBar()->addMenu(testMenu);
+	connect(testAction, SIGNAL(triggered()), this, SLOT(test()));
+
+
+}
+
+void FindCircleWin::test()
+{
+	Communications* c = Communications::CreateCommunications(UDP);
+	char* ipChar = "127.168.12.1";
+	char ipchar[16];
+	BYTE ip[4];
+	PST_IP_INFO ipInfo = new ST_IP_INFO;
+	UINT i;
+	c->InitCom();
+	c->GetIpAddr(ipInfo, i);
+	c->GetIpInfo(ipInfo);
+	ipInfo->abyGateWay;
+	c->IPStringtoByteArray(ipChar, ip);
+	c->ByteIpToStringIp(ip, ipchar);
+}
+
+void FindCircleWin::goBack()
+{
+	m_paintWidget->goBack();
+}
+
+void FindCircleWin::goFront()
+{
+	m_paintWidget->goFront();
 }
 
 /***************************************************************************
@@ -234,27 +279,27 @@ void FindCircleWin::findCircleCIC()
 	params.filterByColor = false;
 	params.minThreshold = 5;
 	params.thresholdStep = 5;
-	params.minArea = 40;
+	params.minArea = 10;
 //    	params.minConvexity = 0.8f;
 //    	params.minInertiaRatio = 0.73f;
 //    	params.minCircularity = 0.8f;
  	params.minConvexity = 0.78f;
- 	params.minInertiaRatio = 0.6f;
- 	params.minCircularity = 0.8f;
+ 	params.minInertiaRatio = 0.5f;
+ 	params.minCircularity = 0.7f;
  	params.maxArea = 10000000000;
  	params.blobColor = 0;
  	params.maxThreshold = 65;
- 	params.maxConvexity = 1.2f;
- 	params.maxCircularity = 1.2f;
- 	params.maxInertiaRatio = 1.2f;
+ 	params.maxConvexity = 1.0f;
+ 	params.maxCircularity = 1.0f;
+ 	params.maxInertiaRatio = 1.0f;
 	params.minDistBetweenBlobs = 2; 
 
 	FindCircularMarker f;
 	cv::Mat keypointsImage;
 	
 	//f.FindCircle(cv::Mat(&pImage), params, centers);
-	//f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, 1.0, false);
-	f.FindCircleByCIC(cv::Mat(&pImage), params, centers, 1.0, false);
+	f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, 1.0, false);
+	//f.FindCircleByCIC(cv::Mat(&pImage), params, centers, 1.0, false);
 	//f.FindCircleByThreshold(cv::Mat(&pImage), params, centers, false);
 	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
 

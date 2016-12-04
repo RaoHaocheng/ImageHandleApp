@@ -27,7 +27,7 @@
 #define  LEFT_CAMERA_IMAGE   1                  // 左边相机拍出来的图片
 #define  RIGHT_CAMERA_IMAGE  2                  // 又边相机拍出来的图片
 #define  TIME_TEST                              // 时间测试宏，可以去除
-//#define  STEP_TIME_TEST                         // 用于每部时间测试
+//#define  STEP_TIME_TEST                       // 用于每部时间测试
 #define  _TEST_						            // 测试宏
 
 // 定义常量

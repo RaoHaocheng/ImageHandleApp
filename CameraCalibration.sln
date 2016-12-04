@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestTools", "TestTools\TestTools.vcxproj", "{13B31104-9F75-442C-BB3F-D448BE226134}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmallTools", "SmallTools\SmallTools.vcxproj", "{121E4AB5-EC8C-494C-87A1-77037F4F8167}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FindCircleApp", "FindCircleApp\FindCircleApp.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Communications", "Communications\Communications.vcxproj", "{4F08408A-4D93-4C81-8314-414C5C716507}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,16 @@ Global
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|Win32.Build.0 = Release|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Debug|Win32.Build.0 = Debug|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Debug|x64.ActiveCfg = Debug|x64
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Release|Win32.ActiveCfg = Release|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Release|Win32.Build.0 = Release|Win32
+		{4F08408A-4D93-4C81-8314-414C5C716507}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

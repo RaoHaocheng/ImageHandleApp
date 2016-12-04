@@ -26,11 +26,11 @@ public:
 		ST_CENTER& center, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);         // 通过三点确定一个圆
 	BOOL FindCircleByThreePoint(const std::vector<cv::Point> counter,
 		std::vector<ST_CENTER>& centers, const double dbPrecision = 0.1, const double dbMinConfidence = 0.3,
-		const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 1000);                                                     // 通过三点确定一个圆
+		const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 1000);                                                          // 通过三点确定一个圆
 	BOOL FindCircleByThreePoint(IplImage*pImg, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);          // 通过三点确定一个圆
+		BOOL bShow = FALSE, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);        // 通过三点确定一个圆
 	BOOL FindCircleByThreePoint(const cv::Mat& cvMatimage, std::vector<ST_CENTER>& vct_ponits,
-		BOOL bShow = FALSE, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);          // 通过三点确定一个圆
+		BOOL bShow = FALSE, const double dbPrecision = 0.1, const UINT iMinSuccessNum = 1, const UINT iMaxTestNum = 10);        // 通过三点确定一个圆
 
 	// 论文中找圆的方法iTCID
 	void CalCircleCentrePoint(IplImage* pImg, std::vector<cv::KeyPoint>& vct_ponits, int ipointscounts);   // 计算圆心坐标的内容

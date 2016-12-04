@@ -16,6 +16,13 @@ public:
 	PaintWidget(QWidget *parent = 0, QRect size = QRect(0, 0, -1, -1));
 	~PaintWidget();
 
+protected:
+	typedef struct IMAGE_MANAGE
+	{
+		std::vector<QImage> images;
+		int index;
+	}ST_IMAGE_MANAGE, *PST_IMAGE_MANAGE;
+
 public:
 	void clearPaintWidget();				                  // 清除控件中显示的内容
 	void setImg(QImage img);							      // 设置图片
@@ -28,7 +35,10 @@ public:
 	bool checkSize(QSize);                                    // 检查当前的图片大小是否超过控件大小
 	void setImgPosX(int);                                     // 设置图片的显示位置
 	void setImgPosY(int);                                     
-	void setImgPos(QPoint);                        
+	void setImgPos(QPoint);                                   
+	bool goBack();                                            // 返回上一层
+	bool goFront();                                           // 返回该一层
+	void clearImageBuffer();                                  // 清除图片的缓存
 
 // 定义的信号
 signals:
@@ -46,6 +56,9 @@ protected:
 protected:
 	inline PaintState currentState() const { return m_paintState; }         // 当前控件工作状态
 	void setPaintState(PaintState state);                                   // 设置画笔状态
+	void setImg(QImage img, bool bInsert);							        // 设置图片
+	inline ST_IMAGE_MANAGE currentImageManage() const { return m_vcImage; }
+	void resetImageManage(QImage img);
 
 // 控件事件的保护
 protected:
@@ -61,6 +74,7 @@ private:
 	static float m_scale;                // 当前当前放大的状态
 	static float m_times;                // 当前倍率
 	QPoint m_imgPos;                     // 先前图片的显示位置
+	ST_IMAGE_MANAGE m_vcImage;           // 图片缓存
 
 };
 

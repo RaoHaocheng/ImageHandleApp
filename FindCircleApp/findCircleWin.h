@@ -3,15 +3,18 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QScrollBar>
+#include <vector>
 #include "ui_findcircleapp.h"
 #include "paintWidget.h"
-
 #include "cvToQt.h"
-#include <vector>
+
 
 // 默认窗口大小
 const int WIN_WIDTH = 800;
 const int WIN_HEIGHT = 600;
+
+// 使用的类
+class QImage;
 
 class FindCircleWin : public QMainWindow
 {
@@ -19,7 +22,8 @@ class FindCircleWin : public QMainWindow
 
 public:
 	FindCircleWin(QWidget *parent = 0);
-	~FindCircleWin();
+	virtual ~FindCircleWin();
+
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -49,9 +53,9 @@ private slots:
 	void batCannyImgHandle();      // 需要修改，目前该功能仅用于测试
 	void edpf();
 	void batEdpf();                // FIXME：need more para;
-
-
-private:
+	void goBack();
+	void goFront();
+	void test();
 
 private:
 	PaintWidget* m_paintWidget;
@@ -59,6 +63,7 @@ private:
 	QScrollBar* m_verticalScroll;
 	QScrollBar* m_horizontalScroll;
 	std::vector<ST_CENTER> centers;
+
 };
 
 #endif // FINDCIRCLEAPP_H

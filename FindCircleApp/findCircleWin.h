@@ -56,6 +56,7 @@ private slots:
 	void goBack();
 	void goFront();
 	void test();
+	void sltShowPopMenu(const QPoint&);
 
 private:
 	PaintWidget* m_paintWidget;
@@ -63,6 +64,7 @@ private:
 	QScrollBar* m_verticalScroll;
 	QScrollBar* m_horizontalScroll;
 	std::vector<ST_CENTER> centers;
+	QMenu* m_popMenu;                      // µ¯³ö²Ëµ¥
 
 };
 

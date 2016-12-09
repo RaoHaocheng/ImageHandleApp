@@ -296,7 +296,7 @@ BOOL UDPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiSe
 	if (iBindErr == SOCKET_ERROR)   // CCsccLog::DebugPrint("绑定接收套接字出错！\n");
 		return FALSE;
 
-	SetServerObj(m_sktReceiveSender, abyServerIp, uiServerPort);			// 将UDP通信套接字加入到服务器端对象中
+	//SetServerObj(m_sktReceiveSender, abyServerIp, uiServerPort);			// 将UDP通信套接字加入到服务器端对象中
 
 	return TRUE;
 

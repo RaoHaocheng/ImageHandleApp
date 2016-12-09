@@ -200,30 +200,103 @@ void FindCircleWin::iniUi()
 	menuBar()->addMenu(testMenu);
 	connect(testAction, SIGNAL(triggered()), this, SLOT(test()));
 
+	// 右键菜单
+	m_popMenu = new QMenu(this); //popMenu为类私有成员
+	goBackAction = m_popMenu->addAction(QStringLiteral("撤销"));
+	connect(goBackAction, SIGNAL(triggered(bool)), this, SLOT(goBack()));
+	goFrontAction = m_popMenu->addAction(QStringLiteral("重做"));
+	connect(goFrontAction, SIGNAL(triggered(bool)), this, SLOT(goFront()));
+
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+		this, SLOT(sltShowPopMenu(const QPoint&)));
 
 }
 
+/***************************************************************************
+* 函数名称：   sltShowPopMenu
+* 摘　　要：   
+* 全局影响：   private 
+* 参　　数：   [in]  const QPoint & point
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/12/04      饶智博        添加
+***************************************************************************/
+void FindCircleWin::sltShowPopMenu(const QPoint& point)
+{
+	if (m_popMenu){
+		m_popMenu->exec(QCursor::pos());
+	}
+}
+
+/***************************************************************************
+* 函数名称：   test
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/12/04      饶智博        添加
+***************************************************************************/
 void FindCircleWin::test()
 {
-	Communications* c = Communications::CreateCommunications(UDP);
-	char* ipChar = "127.168.12.1";
-	char ipchar[16];
-	BYTE ip[4];
-	PST_IP_INFO ipInfo = new ST_IP_INFO;
-	UINT i;
-	c->InitCom();
-	c->GetIpAddr(ipInfo, i);
-	c->GetIpInfo(ipInfo);
-	ipInfo->abyGateWay;
-	c->IPStringtoByteArray(ipChar, ip);
-	c->ByteIpToStringIp(ip, ipchar);
+
+
+ 	FindContoursMethod f;
+ 	QImage img = m_paintWidget->Img();
+ 	//IplImage pImage = QImage2cvIplImage(img);
+ 	cv::Mat src = QImage2Mat(img);
+ 
+ 	cv::Mat dst;
+ 	//f.findContoursByEDPF(src, dst, 1.0);
+ 	//f.findContoursByED(src, dst);
+	f.findContoursByCannyLine(src, dst);
+ 
+ 	img = Mat2QImage(dst);
+	m_paintWidget->setImg(img);
+
+// 	Communications* c = Communications::CreateCommunications(UDP);
+// 	char* ipChar = "127.168.12.1";
+// 	char ipchar[16];
+// 	BYTE ip[4];
+// 	PST_IP_INFO ipInfo = new ST_IP_INFO;
+// 	UINT i;
+// 	c->InitCom();
+// 	c->GetIpAddr(ipInfo, i);
+// 	c->GetIpInfo(ipInfo);
+// 	ipInfo->abyGateWay;
+// 	c->IPStringtoByteArray(ipChar, ip);
+// 	c->ByteIpToStringIp(ip, ipchar);
 }
 
+/***************************************************************************
+* 函数名称：   goBack
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/12/04      饶智博        添加
+***************************************************************************/
 void FindCircleWin::goBack()
 {
 	m_paintWidget->goBack();
 }
 
+/***************************************************************************
+* 函数名称：   goFront
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/12/04      饶智博        添加
+***************************************************************************/
 void FindCircleWin::goFront()
 {
 	m_paintWidget->goFront();
@@ -320,31 +393,31 @@ void FindCircleWin::findCircleCIC()
 ***************************************************************************/
 void FindCircleWin::checkSize(QSize size)
 {
-	QSize winSize = this->size();
-	
-	if (size.width() > winSize.width())
-	{
-		m_horizontalScroll->setMaximum(size.width()-winSize.width());
-		m_horizontalScroll->setMinimum(0);
-		m_horizontalScroll->setPageStep(size.width());
-		m_horizontalScroll->show();
-	}
-	else
-	{
-		m_horizontalScroll->hide();
-	}
-
-	if (size.height() > winSize.height())
-	{
-		m_verticalScroll->setMaximum(size.height() - winSize.height());
-		m_verticalScroll->setMinimum(0);
-		m_verticalScroll->setPageStep(size.height() );
-		m_verticalScroll->show();
-	}
-	else
-	{
-		m_verticalScroll->hide();
-	}
+// 	QSize winSize = this->size();
+// 	
+// 	if (size.width() > winSize.width())
+// 	{
+// 		m_horizontalScroll->setMaximum(size.width()-winSize.width());
+// 		m_horizontalScroll->setMinimum(0);
+// 		m_horizontalScroll->setPageStep(size.width());
+// 		m_horizontalScroll->show();
+// 	}
+// 	else
+// 	{
+// 		m_horizontalScroll->hide();
+// 	}
+// 
+// 	if (size.height() > winSize.height())
+// 	{
+// 		m_verticalScroll->setMaximum(size.height() - winSize.height());
+// 		m_verticalScroll->setMinimum(0);
+// 		m_verticalScroll->setPageStep(size.height() );
+// 		m_verticalScroll->show();
+// 	}
+// 	else
+// 	{
+// 		m_verticalScroll->hide();
+// 	}
 }
 
 
@@ -361,17 +434,17 @@ void FindCircleWin::checkSize(QSize size)
 ***************************************************************************/
 void FindCircleWin::resizeEvent(QResizeEvent *event)
 {
-	// 使用过的控件重新布局
-	const int SCROLL_WIDGET_WIDTH = 20;
-	m_verticalScroll->setGeometry(this->width() - SCROLL_WIDGET_WIDTH, 
-		SCROLL_WIDGET_WIDTH, SCROLL_WIDGET_WIDTH, this->height() - SCROLL_WIDGET_WIDTH);
-	m_horizontalScroll->setGeometry(0, this->height() - SCROLL_WIDGET_WIDTH, 
-		this->width() - SCROLL_WIDGET_WIDTH, SCROLL_WIDGET_WIDTH);
-
-	// 改变了窗口后，在检查其中的中间是否有超过的问题
-	m_paintWidget->checkSize(this->size());
-
-	event->accept();
+// 	// 使用过的控件重新布局
+// 	const int SCROLL_WIDGET_WIDTH = 20;
+// 	m_verticalScroll->setGeometry(this->width() - SCROLL_WIDGET_WIDTH, 
+// 		SCROLL_WIDGET_WIDTH, SCROLL_WIDGET_WIDTH, this->height() - SCROLL_WIDGET_WIDTH);
+// 	m_horizontalScroll->setGeometry(0, this->height() - SCROLL_WIDGET_WIDTH, 
+// 		this->width() - SCROLL_WIDGET_WIDTH, SCROLL_WIDGET_WIDTH);
+// 
+// 	// 改变了窗口后，在检查其中的中间是否有超过的问题
+// 	m_paintWidget->checkSize(this->size());
+// 
+// 	event->accept();
 }
 
 /***************************************************************************
@@ -387,7 +460,7 @@ void FindCircleWin::resizeEvent(QResizeEvent *event)
 ***************************************************************************/
 void FindCircleWin::changeHScrollVaule(int vaule)
 {
-	m_paintWidget->setImgPosX(-vaule);
+	//m_paintWidget->setImgPosX(-vaule);
 }
 
 /***************************************************************************
@@ -403,7 +476,7 @@ void FindCircleWin::changeHScrollVaule(int vaule)
 ***************************************************************************/
 void FindCircleWin::changeVScrollVaule(int vaule)
 {
-	m_paintWidget->setImgPosY(-vaule);
+//	m_paintWidget->setImgPosY(-vaule);
 }
 
 /***************************************************************************

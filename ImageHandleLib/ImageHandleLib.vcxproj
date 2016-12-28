@@ -44,7 +44,6 @@
     <ClCompile Include="FindCircularMarker.cpp" />
     <ClCompile Include="FindCountersMethod.cpp" />
     <ClCompile Include="MetaLine.cpp" />
-    <ClCompile Include="TestMain.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>ImageHandleLib</ProjectName>

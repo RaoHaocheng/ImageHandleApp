@@ -47,7 +47,7 @@ char* CommandLineParse::Value(const char* command)
 			// 说明后一位是有数据的
 			if (i + 1 < (int)m_commandLine.size())
 			{
-				return m_commandLine.at(i + 1);
+				return m_commandLine.at(++i);
 			}
 			else
 				return NULL;

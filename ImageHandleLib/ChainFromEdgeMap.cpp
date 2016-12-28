@@ -92,7 +92,7 @@ void ChainFromEdgeMap::run( cv::Mat &image, cv::Mat &edgeMap, std::vector<std::v
 	ptrM = (double*)maskImage.data;
 	uchar *ptrO = (uchar*)orientationMap.data;
 
-	int numGradientPoints = gradientPoints.size();
+	int numGradientPoints = (int)gradientPoints.size();
 	QuickSort<double, cv::Point>::SortDescent( &gradientValue[0], 0, numGradientPoints - 1, &gradientPoints[0] );
 	//std::sort( dataset.begin(), dataset.end(), []( const double& lhs, const double& rhs ){ return lhs < rhs; } );
 
@@ -115,7 +115,7 @@ void ChainFromEdgeMap::run( cv::Mat &image, cv::Mat &edgeMap, std::vector<std::v
 		} while ( next(x, y) );
 
 		cv::Point temp;
-		for ( int m = 0, n = chain.size() - 1; m<n; ++m, --n )
+		for ( int m = 0, n = (int)chain.size() - 1; m<n; ++m, --n )
 		{
 			temp = chain[m];
 			chain[m] = chain[n];

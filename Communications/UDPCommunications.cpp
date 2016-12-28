@@ -201,7 +201,7 @@ BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalP
 
 BOOL UDPCommunications::Receive()                 // 完成接收代
 {
-
+	return TRUE;
 }
 
 

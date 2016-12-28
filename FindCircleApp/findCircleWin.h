@@ -7,6 +7,7 @@
 #include "ui_findcircleapp.h"
 #include "paintWidget.h"
 #include "cvToQt.h"
+#include "..\\TestTools\\LogHandler.h"
 
 
 // 默认窗口大小
@@ -57,6 +58,7 @@ private slots:
 	void goFront();
 	void test();
 	void sltShowPopMenu(const QPoint&);
+	void drawConnectedDomain();
 
 private:
 	PaintWidget* m_paintWidget;

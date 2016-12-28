@@ -15,9 +15,9 @@ CannyPF::~CannyPF(void)
 
 void CannyPF::cannyPF( cv::Mat &image, int gaussianSize, float VMGradient, cv::Mat &edgeMap )
 {
-	int i,j,m,n;
+	int i,j;
 	int grayLevels=255;
-	float gNoise=1.3333;  //1.3333 
+	float gNoise=1.3333f;  //1.3333 
 	float thGradientLow=gNoise;
 
 	int cols = image.cols;
@@ -27,7 +27,7 @@ void CannyPF::cannyPF( cv::Mat &image, int gaussianSize, float VMGradient, cv::M
 
 	//meaningful Length
 	int thMeaningfulLength=int(2.0*log((float)rows*cols)/log(8.0)+0.5);
-	float thAngle=2*atan(2.0/float(thMeaningfulLength));
+	float thAngle=2*atan(2.0f/float(thMeaningfulLength));
 
 	//get gray image
 	cv::Mat grayImage;
@@ -84,8 +84,8 @@ void CannyPF::cannyPF( cv::Mat &image, int gaussianSize, float VMGradient, cv::M
 		if (histogram[i])
 			N2+=(float)histogram[i]*(histogram[i]-1);
 	}
-	float pMax=1.0/exp((log(N2)/thMeaningfulLength));
-	float pMin=1.0/exp((log(N2)/sqrt((float)cols*rows)));
+	float pMax=1.0f/exp((log(N2)/thMeaningfulLength));
+	float pMin=1.0f/exp((log(N2)/sqrt((float)cols*rows)));
 
 	std::vector<float> greaterThan(times*grayLevels,0);
 	int count=0;
@@ -111,7 +111,7 @@ void CannyPF::cannyPF( cv::Mat &image, int gaussianSize, float VMGradient, cv::M
 	{
 		if (greaterThan[i]>pMin)
 		{
-			thGradientLow=i;
+			thGradientLow=(float)i;
 			break;
 		}
 	}
@@ -120,7 +120,7 @@ void CannyPF::cannyPF( cv::Mat &image, int gaussianSize, float VMGradient, cv::M
 	//cout<<thGradientLow<<"  "<<thGradientHigh<<endl;
 
 	//convert probabilistic meaningful to visual meaningful
-	thGradientHigh=sqrt(thGradientHigh*VMGradient);
+	thGradientHigh=(int)sqrt(thGradientHigh*VMGradient);
 	
 	//canny
 	cv::Canny(filteredImage,edgeMap,thGradientLow,thGradientHigh,apertureSize);

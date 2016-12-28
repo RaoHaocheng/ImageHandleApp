@@ -1215,3 +1215,28 @@ DLLS_PORT void _AdaptiveFindThreshold(CvMat *dx, CvMat *dy, double *low, double 
 	cvReleaseImage(&imge);
 	cvReleaseHist(&hist);
 }
+
+DLLS_PORT cv::Scalar GetSevenColor(int iColorCode)
+{
+	// return the color(rgb)
+	switch (iColorCode)
+	{
+	case 0:
+		return cv::Scalar(255, 0, 0);
+	case 1:
+		return cv::Scalar(255, 128, 0);
+	case 2:
+		return cv::Scalar(255, 255, 0);
+	case 3:
+		return cv::Scalar(0, 255, 0);
+	case 4:
+		return cv::Scalar(0, 255, 255);
+	case 5:
+		return cv::Scalar(0, 0, 255);
+	case 6:
+		return cv::Scalar(128, 0, 255);
+	default:
+		return cv::Scalar(0, 0, 0);
+		break;
+	}
+}

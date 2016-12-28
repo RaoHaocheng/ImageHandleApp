@@ -72,6 +72,8 @@ protected:
 	// 重载函数，为了解决Mat的调用的问题
 	BOOL FindCircleImproved(cv::Mat& cvMatimage, cv::SimpleBlobDetector::Params params,
 		std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);                                           // 重载函数，为了解决Mat的调用的问题
+public:
+	BOOL AccuaryCircleLocation(cv::Mat src, std::vector<ST_CENTER>& vct_ponits, BOOL bShow = FALSE);       // 精确的圆心定位
 
 private:
 	// 利用均方差检测是否是在正元

@@ -24,9 +24,15 @@
     <ClInclude Include="Define.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LogHandler.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TimerCounter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LogHandler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

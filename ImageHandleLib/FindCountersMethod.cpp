@@ -374,9 +374,9 @@ BOOL FindContoursMethod::findContoursByCannyLine(const cv::Mat& src, cv::Mat& ds
  
  	// show
  	cv::Mat imgShow(cvMatTemImg.rows, cvMatTemImg.cols, CV_8UC3, cv::Scalar(255, 255, 255));
-  	for (int m = 0; m < lines.size(); ++m)
+  	for (int m = 0; m < (int)lines.size(); ++m)
   	{
-  		cv::line(imgShow, cv::Point(lines[m][0], lines[m][1]), cv::Point(lines[m][2], lines[m][3]), cv::Scalar(0, 0, 0), 1, CV_AA);
+		cv::line(imgShow, cv::Point((int)lines[m][0], (int)lines[m][1]), cv::Point((int)lines[m][2], (int)lines[m][3]), cv::Scalar(0, 0, 0), 1, CV_AA);
   	}
 
 	dst = imgShow.clone();
@@ -430,5 +430,59 @@ BOOL FindContoursMethod::findContoursByCannyPF(const cv::Mat& src, cv::Mat& dst)
 	}
 	dst = imgShow.clone();
 
+	return TRUE;
+}
+
+/***************************************************************************
+* 函数名称：   findConnectedDomain
+* 摘　　要：   需要注意的输入进来的只能是灰度图像
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Mat & src
+* 参　　数：   [in]  cv::Mat & dst
+* 返回值　：   BOOL
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/12/22      饶智博        添加
+***************************************************************************/
+BOOL FindContoursMethod::findConnectedDomain(const cv::Mat& src, cv::Mat& dst, int& iTotal /* = 0 */)
+{
+	cv::Mat cvMatTemImg = src.clone();  // 复制图片，以免出现问题
+	cv::Mat src_gray;
+	iTotal = 0;
+
+	// this function only for gray image
+	if (CV_8UC1 != cvMatTemImg.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatTemImg.clone();
+
+	// find contours
+	std::vector < std::vector<cv::Point> > contours; // 轮廓标记点存储的位置
+	findContours(src_gray, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+
+	// get connected domain contours image
+	cv::Mat contoursImage(src_gray.rows, src_gray.cols, CV_8UC3, cv::Scalar(0, 0, 0));
+	//cvtColor(src_gray, contoursImage, CV_GRAY2RGB);
+	const int COLOR_NUM = 7; // the color number, seven color
+
+	// draw contoursImage
+	for (int i = 0; i < (int)contours.size(); i++)
+	{
+		std::vector < std::vector<cv::Point> > contour;
+
+		// check connected domain
+		cv::Moments moms = cv::moments(cv::Mat(contours[i]), true);
+		double area = moms.m00;
+		if (area <= contours[i].size())
+			continue;
+
+		iTotal++;
+		contour.push_back(contours.at(i));
+		// draw the contour by the different color
+		drawContours(contoursImage, contour, -1, GetSevenColor(i%COLOR_NUM));
+	}
+
+	dst = contoursImage.clone();
 	return TRUE;
 }

@@ -123,9 +123,11 @@
   <ItemGroup>
     <ClInclude Include="BaseTestTools.h" />
     <ClInclude Include="Define.h" />
+    <ClInclude Include="LogHandler.h" />
     <ClInclude Include="TimerCounter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LogHandler.cpp" />
     <ClCompile Include="TimerCounter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

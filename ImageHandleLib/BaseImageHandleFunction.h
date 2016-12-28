@@ -86,4 +86,7 @@ DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst);
 DLLS_PORT void AdaptiveFindThreshold(const CvArr* image, double *low, double *high, int aperture_size = 3);
 DLLS_PORT void _AdaptiveFindThreshold(CvMat *dx, CvMat *dy, double *low, double *high);
 
+// color produce
+DLLS_PORT cv::Scalar GetSevenColor(int iColorCode);
+
 #endif // !BASEIMAGEHANDLEFUNCTION_H

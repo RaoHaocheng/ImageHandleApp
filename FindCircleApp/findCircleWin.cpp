@@ -182,6 +182,7 @@ void FindCircleWin::iniUi()
 	QAction *batAction = imgHandleMenu->addAction(QStringLiteral("批处理"));
 	QAction *edpfAction = imgHandleMenu->addAction(QStringLiteral("edpf"));
 	QAction *batEdpfAction = imgHandleMenu->addAction(QStringLiteral("edpf批处理"));
+	QAction *drawConnectedDomainAction = imgHandleMenu->addAction(QStringLiteral("描绘连通域"));
 	
 	menuBar()->addMenu(imgHandleMenu);
 	connect(gaussianAction, SIGNAL(triggered()), this, SLOT(addGaussianNoise()));
@@ -192,6 +193,8 @@ void FindCircleWin::iniUi()
 	connect(batCannyAction, SIGNAL(triggered()), this, SLOT(batCannyImgHandle()));
 	connect(edpfAction, SIGNAL(triggered()), this, SLOT(edpf()));
 	connect(batEdpfAction, SIGNAL(triggered()), this, SLOT(batEdpf()));
+	connect(drawConnectedDomainAction, SIGNAL(triggered()), this, SLOT(drawConnectedDomain()));
+
 
 	// 测试按钮
 	QMenu *testMenu = new QMenu(QStringLiteral("测试"), this);
@@ -211,6 +214,30 @@ void FindCircleWin::iniUi()
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 		this, SLOT(sltShowPopMenu(const QPoint&)));
 
+}
+
+/***************************************************************************
+* 函数名称：   drawConnectedDomain
+* 摘　　要：   
+* 全局影响：   private 
+* 返回值　：   void
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2016/12/22      饶智博        添加
+***************************************************************************/
+void FindCircleWin::drawConnectedDomain()
+{
+	FindContoursMethod f;
+	QImage img = m_paintWidget->Img();
+	cv::Mat src = QImage2Mat(img);
+
+	cv::Mat dst;
+	int iTotal;
+	f.findConnectedDomain(src, dst, iTotal);
+
+	img = Mat2QImage(dst);
+	m_paintWidget->setImg(img);
 }
 
 /***************************************************************************
@@ -243,9 +270,19 @@ void FindCircleWin::sltShowPopMenu(const QPoint& point)
 ***************************************************************************/
 void FindCircleWin::test()
 {
+	//"LogFile.log", "D:/Program/ImageHandleApp/x64/Debug/"
+	//LogHandler::SetFilePath();
+	LogHandler::SetWinLogHandlerState(false);
+	WARNING_LOG("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
+	LogHandler::Warning("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
+	LogHandler::Error("%s 1%d 2%f 3%c 4%x 5%o 6%%", "hello", 10, 28.888, 'm', 50, 16);
+	LogHandler::Info("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
+	LogHandler::Debug("%s 1%d 2%f 3%c 4%x 5%o 6%%", "hello", 10, 28.888, 'm', 50, 16);
 
 
- 	FindContoursMethod f;
+	return;
+
+ 	FindCircularMarker f;
  	QImage img = m_paintWidget->Img();
  	//IplImage pImage = QImage2cvIplImage(img);
  	cv::Mat src = QImage2Mat(img);
@@ -253,7 +290,14 @@ void FindCircleWin::test()
  	cv::Mat dst;
  	//f.findContoursByEDPF(src, dst, 1.0);
  	//f.findContoursByED(src, dst);
-	f.findContoursByCannyLine(src, dst);
+	std::vector<ST_CENTER> centers;
+	ST_CENTER center;
+	center.location.x = 436;
+	center.location.y = 350;
+	center.radius = 200;
+	centers.push_back(center);
+	f.AccuaryCircleLocation(src, centers);
+	//f.findContoursByCannyLine(src, dst);
  
  	img = Mat2QImage(dst);
 	m_paintWidget->setImg(img);

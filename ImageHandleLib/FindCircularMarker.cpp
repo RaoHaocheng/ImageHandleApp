@@ -1616,7 +1616,7 @@ void FindCircularMarker::FindCircleByCICImproved(const cv::Mat& cvMatImage,
 
 	// 看是否要显示出图片
 	if (bShow){
-		const char* windows_name = "canny";
+		const char* windows_name = "EDPF";
 		cvNamedWindow(windows_name, CV_WINDOW_NORMAL);
 		imshow(windows_name, dst);
 		cvWaitKey(0);
@@ -1674,4 +1674,90 @@ void FindCircularMarker::FindCircleByCIC(const cv::Mat& cvMatImage,
 	// 调用改进型算法完成该内容
 	//FindCircleImproved(dst, params, vct_ponits, bShow);
 	FindCircle(dst, params, vct_ponits, bShow);
+
+	AccuaryCircleLocation(src_gray, vct_ponits, bShow);
+
+}
+
+BOOL FindCircularMarker::AccuaryCircleLocation(cv::Mat src, std::vector<ST_CENTER>& vct_ponits, BOOL bShow /* = FALSE */)
+{
+	cv::Mat cvMatTemImg = src.clone();  // 复制图片，以免出现问题
+	cv::Mat src_gray;                          // 灰度图   
+
+	if (CV_8UC1 != src.type())
+		cvtColor(cvMatTemImg, src_gray, CV_BGR2GRAY);
+	else
+		src_gray = cvMatTemImg.clone();
+
+	IplImage* pImage = cvCreateImage(cvGetSize(&IplImage(src_gray)), IPL_DEPTH_8U, 1);
+
+	// 使用Otsu计算出阈值
+	int cannyThreshold = Otsu(&IplImage(src_gray));
+	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
+	cvCanny(&IplImage(src_gray), pImage, cannyThreshold*0.8, cannyThreshold, 3);
+
+	for (int iCirclenCounts = 0; iCirclenCounts <(int)vct_ponits.size(); iCirclenCounts++)
+	{
+		/// 粗略的圆心坐标
+		int iCentreX = (int)vct_ponits.at(iCirclenCounts).location.x;
+		int iCentreY = (int)vct_ponits.at(iCirclenCounts).location.y;
+
+		const int iPointNum = 72;  // 采集点的个数
+		const int iPointD = 2;     // 点的位数
+
+		///扫描到的边缘点集
+		int m_iPos[iPointNum][iPointD];
+		memset(m_iPos, 0, sizeof(int) * iPointNum * iPointD);
+
+		/// 以0°（水平向右）为起点，沿逆时针方向每隔5°在圆周上取一点，并向圆心方向搜索，若某一点的像素值为255时，则为边缘点。
+		const int iFullDegree = 360;
+		const int iHalfDegree = 180;
+		const int iThreeQuarters = 270;
+		const int iSampleInterval = 5;
+		const int iScale = 2;
+
+		for (int iAngle = 0; iAngle < iFullDegree; iAngle += iSampleInterval)
+		{
+			for (int iR = 1; iR < (int)(vct_ponits.at(iCirclenCounts).radius*iScale); iR++)
+			{
+				int iX = (int)(iCentreX + (iR * cos((double)iAngle * PI / iHalfDegree) 
+					+ (((iAngle >= 0 && iAngle <= 90) || (iAngle >= iThreeQuarters && iAngle < iFullDegree)) ? 0.5 : -0.5))); // 待判断点的X坐标，式中的0.5为修正值
+				int iY = (int)(iCentreY - (iR * sin((double)iAngle * PI / iHalfDegree)
+					+ ((iAngle >= 0 && iAngle < iHalfDegree) ? 0.5 : -0.5)));	 // 待判断点的Y坐标，式中的0.5为修正值
+
+				/// 判断是否超出图像的范围
+				if (iX < 0 || iX >= pImage->width || iY < 0 || iY >= pImage->height)
+				{
+					m_iPos[iAngle / iSampleInterval][0] = iX - iCentreX;	 // 扫描到的边缘点集（iPos）是以（iCentreX，iCentreY）为坐标中心的坐标
+					m_iPos[iAngle / iSampleInterval][1] = iY - iCentreY;
+					break;
+				}
+
+				uchar ucVal = (uchar)*(pImage->imageData + iY * pImage->widthStep + iX * pImage->nChannels + 0);
+				if (255 == ucVal)
+				{
+					m_iPos[iAngle / iSampleInterval][0] = iX - iCentreX;	 // 扫描到的边缘点集（iPos）是以（iCentreX，iCentreY）为坐标中心的坐标
+					m_iPos[iAngle / iSampleInterval][1] = iY - iCentreY;
+					break;
+				}
+			}
+		}// end for
+
+		double dbDistance = 0;
+		int iUnPoint = 0; // 去除可能不用的点
+		/// 计算平均值
+		for (int i = 0; i < iPointNum; i++)
+		{
+			double dbDis = sqrt((double)(m_iPos[i][0] * m_iPos[i][0] + m_iPos[i][1]/* -iCentreY*/ * m_iPos[i][1]));
+			if (0 == dbDis)
+				iUnPoint++;
+			dbDistance += dbDis;
+		}
+
+		vct_ponits.at(iCirclenCounts).radius = dbDistance / (iPointNum - iUnPoint);
+
+	}
+
+	cvReleaseImage(&pImage);
+	return TRUE;
 }

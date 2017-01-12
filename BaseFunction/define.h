@@ -11,7 +11,6 @@
 // windows基本库
 #include <windows.h>
 
-
 // 定义编译环境
 #ifdef  _DLL
 #define  DLLS_PORT   __declspec(dllexport)      // 动态链接库导出

@@ -347,7 +347,7 @@ BOOL FindContoursMethod::findContoursByEDPF(const cv::Mat& src, cv::Mat& dst, do
 			EDPF_edge_outData[j] = map->edgeImg[i*width + j];
 	}
 
-	delete srcImg;
+	delete [] srcImg;
 
 	return TRUE;
 }

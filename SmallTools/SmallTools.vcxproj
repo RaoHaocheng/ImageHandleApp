@@ -100,7 +100,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>CameraCalibrationd.lib;BaseFunctiond.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Communicationsd.lib;CameraCalibrationd.lib;BaseFunctiond.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

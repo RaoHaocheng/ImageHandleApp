@@ -27,12 +27,18 @@
     <ClInclude Include="CommandLineParse.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThreadManage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CommandLineParse.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryPool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

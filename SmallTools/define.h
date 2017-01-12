@@ -5,8 +5,7 @@
 #include <iostream>
 
 // 包含自己基本库的内容
-#include "..\ImageHandleLib\CameraCalibration.h"
-#include "..\ImageHandleLib\FindCircularMarker.h"
+#include "..\Communications\communications.h"
 #include "..\BaseFunction\BaseFunction.h"
 
 // 该项目中需要自己定义的数据结构体

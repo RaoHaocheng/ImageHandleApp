@@ -13,7 +13,6 @@
 //#include <winsock2.h>
 #pragma comment(lib,"ws2_32.lib")
 
-
 // 定义编译环境
 #ifdef  _DLL
 #define  DLLS_PORT   __declspec(dllexport)      // 动态链接库导出
@@ -21,7 +20,9 @@
 #define  DLLS_PORT
 #endif
 
-
+#define SD_RECEIVE      0x00
+#define SD_SEND         0x01
+#define SD_BOTH         0x02
 #define MAX_FILE_PATH	    256
 #define MAX_LOG_LENGTH	    512
 #define SERVER_WAIT_TIME    100            // 服务器等待时间
@@ -45,8 +46,12 @@ static const int IP_FIRST_NUM = 0;         // ip中的第一位
 static const int IP_SCE_NUM = 1;           // ip中的第二位
 static const int IP_THIRD_NUM = 2;         // ip中的第三位
 static const int IP_FOURTH_NUM = 3;        // ip中的第四位
-static const int DATA_BUF_LENGTH = 4096;   // 数据包存放的数据大小
+static const int DATA_BUF_LENGTH = 1024;   // 数据包存放的数据大小
+static const int BUFFER_SIZE_TIMES = 10;   // 缓存倍数
 
+// ShareMemory Data struct
+static const int SHARE_MEM_BUF_SIZE = 1024 * 1024 * 5;	//5M
+static const int CHARS_BUFFER_SIZE = 255;
 
 typedef struct STRUCT_IP_INFO//IP地址信息
 {
@@ -61,13 +66,12 @@ typedef struct STRUCT_IP_INFO//IP地址信息
 // 数据包体结构体
 typedef struct STRUCT_PACKAGE
 {
-	BYTE abySourceIp[IP_BYTE_LENGTH];	// 数据源地址
-	UINT uiSourcePort;					// 数据源端口
-	UINT uiFrameNum;					// 帧号
-	UINT uiPackageNum;					// 包号
+	BYTE  abySourceIp[IP_BYTE_LENGTH];	// 数据源地址
+	UINT  uiSourcePort;					// 数据源端口
+	size_t uiFrameNum;					// 帧号
+	size_t uiPackageNum;				// 包号
 	byte abyData[DATA_BUF_LENGTH];		// 数据缓存
-	UINT uiDataLength;					// 包中数据长度
-	UINT uiTotalDataLength;				// 待发送数据的总长度
+	size_t uiDataLength;				// 包中数据长度
+	size_t uiTotalDataLength;			// 待发送数据的总长度
 }ST_PACKAGE, *PST_PACKAGE;
-
 #endif // !DEFINE_H

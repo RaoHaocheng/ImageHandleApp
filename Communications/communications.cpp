@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <IPHlpApi.h>  // 操作网卡相关的函数库头文件
 #include "UDPCommunications.h"
+#include "TCPCommunications.h"
 #include <string>
 
 #pragma comment(lib,"Iphlpapi.lib")
@@ -27,6 +28,7 @@ Communications* Communications::CreateCommunications(COMMUNICATIONS_TYPE type)
 		return new UDPCommunications();
 		break;
 	case TCP:
+		return new TCPCommunications();
 		break;
 	case MULTICAST:
 		break;
@@ -72,13 +74,13 @@ void Communications::GetIpInfo(PST_IP_INFO pstIpInfo)
 
 	DWORD dwRetVal = 0; // 返回值
 
-	// 第一次调用GetAdapterInfo获取ulOutBufLen大小，此时调用会出错
+	// means there are many adapter in computer
 	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
 	{
 		delete pAdapterInfo;
 
 		// 分配接收缓存大小
-		pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
+		pAdapterInfo = new IP_ADAPTER_INFO[ulOutBufLen / sizeof(IP_ADAPTER_INFO)];
 	}
 
 	// 第二次调用GetAdapterInfo获取网卡信息，如果成功则可以通过该函数第一个参数所带出来的值获取相关信息
@@ -91,12 +93,6 @@ void Communications::GetIpInfo(PST_IP_INFO pstIpInfo)
 		{
 			// 网卡的MAC地址信息
 			memcpy(pstIpInfo[iAdapterIdx].abyMacAddr, pAdapter->Address, sizeof(BYTE)*MAC_BYTE_LENGTH);
-//  			pstIpInfo[iAdapterIdx].abyMacAddr[0] = pAdapter->Address[0];
-//  			pstIpInfo[iAdapterIdx].abyMacAddr[1] = pAdapter->Address[1];
-//  			pstIpInfo[iAdapterIdx].abyMacAddr[2] = pAdapter->Address[2];
-//  			pstIpInfo[iAdapterIdx].abyMacAddr[3] = pAdapter->Address[3];
-//  			pstIpInfo[iAdapterIdx].abyMacAddr[4] = pAdapter->Address[4];
-//  			pstIpInfo[iAdapterIdx].abyMacAddr[5] = pAdapter->Address[5];
 
 			// IP地址
 			IPStringtoByteArray(pAdapter->IpAddressList.IpAddress.String, pstIpInfo[iAdapterIdx].abyIPAddr);
@@ -121,7 +117,11 @@ void Communications::GetIpInfo(PST_IP_INFO pstIpInfo)
 			iAdapterIdx++;
 		}
 	}
-	delete pAdapterInfo;
+	if (ulOutBufLen > sizeof(IP_ADAPTER_INFO))
+		delete[] pAdapterInfo;
+	else
+		delete pAdapterInfo;
+
 	pAdapterInfo = NULL;
 }
 
@@ -140,6 +140,7 @@ void Communications::GetIpInfo(PST_IP_INFO pstIpInfo)
 void Communications::GetIpAddr(PST_IP_INFO pstIpInfo, UINT &uiIpNum)
 {
 	char szHostName[HOST_NAME_LENGTH]; // 主机名字
+	uiIpNum = 0;
 
 	// 获取本地主机地址
 	if (gethostname(szHostName, HOST_NAME_LENGTH) == 0)
@@ -236,7 +237,7 @@ void Communications::IPStringtoByteArray(char szIp[IP_CHAR_LENGTH], BYTE abyByte
 ***************************************************************************/
 void Communications::ByteIpToStringIp(byte abyByteArray[IP_BYTE_LENGTH], char* pcStringIp)
 {
-	sprintf_s(pcStringIp, IP_CHAR_LENGTH, "%d,%d,%d,%d", 
+	sprintf_s(pcStringIp, IP_CHAR_LENGTH, "%d.%d.%d.%d", 
 		abyByteArray[IP_FIRST_NUM], abyByteArray[IP_SCE_NUM], 
 		abyByteArray[IP_THIRD_NUM], abyByteArray[IP_FOURTH_NUM]);
 }

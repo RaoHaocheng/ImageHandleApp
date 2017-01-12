@@ -1,46 +1,19 @@
-#include "UDPCommunications.h"
+#include "TCPCommunications.h"
 #include <atlconv.h>
 
-/***************************************************************************
-* 函数名称：   UDPCommunications
-* 摘　　要：   
-* 全局影响：   public 
-* 返回值　：   
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-UDPCommunications::UDPCommunications()
+static const int MAX_LISTEN_NUM = 5;
+
+TCPCommunications::TCPCommunications()
 {
+
 }
 
-/***************************************************************************
-* 函数名称：   ~UDPCommunications
-* 摘　　要：   
-* 全局影响：   virtual public 
-* 返回值　：   
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-UDPCommunications::~UDPCommunications()
+TCPCommunications::~TCPCommunications()
 {
 	ReleaseCom();
 }
 
-/***************************************************************************
-* 函数名称：   InitCom
-* 摘　　要：   
-* 全局影响：   virtual public 
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::InitCom()                    // 初始化相关函数
+BOOL TCPCommunications::InitCom()
 {
 	int iInitialError;								// 函数返回值
 	WSADATA data;       							// 初始化套接字
@@ -61,24 +34,10 @@ BOOL UDPCommunications::InitCom()                    // 初始化相关函数
 	return TRUE;
 }
 
-/***************************************************************************
-* 函数名称：   Send
-* 摘　　要：   
-* 全局影响：   virtual public 
-* 参　　数：   [in]  BYTE abyDestIp[IP_BYTE_LENGTH]
-* 参　　数：   [in]  UINT uiDesPort
-* 参　　数：   [in]  byte * pbyBuffer
-* 参　　数：   [in]  UINT uiDataLength
-* 参　　数：   [in]  UINT uiFrameNum
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::Send(BYTE abyDestIp[IP_BYTE_LENGTH], UINT uiDesPort,
-	byte *pbyBuffer, size_t uiDataLength, size_t uiFrameNum)
+BOOL TCPCommunications::Send(BYTE abyDestIp[IP_BYTE_LENGTH],
+	UINT uiDesPort, byte *pbyBuffer, size_t uiDataLength, size_t uiFrameNum)
 {
+
 	USES_CONVERSION;
 
 	char pcDesIp[IP_CHAR_LENGTH];
@@ -88,6 +47,30 @@ BOOL UDPCommunications::Send(BYTE abyDestIp[IP_BYTE_LENGTH], UINT uiDesPort,
 	sdServeraddr.sin_family = AF_INET;
 	sdServeraddr.sin_addr.S_un.S_addr = inet_addr(pcDesIp);
 	sdServeraddr.sin_port = htons(uiDesPort);    //端口号,主机字节序转换为网络字节序，等待发送
+	
+	if (m_sktTCPSender != INVALID_SOCKET)
+		closesocket(m_sktTCPSender);
+
+	// 创建UDP发送套接字
+	m_sktTCPSender = socket(AF_INET,      // 协议地址家族，windows下一般为AF_INET
+		SOCK_STREAM,						  // 协议套接字类型，此处UDP采用数据报型
+		IPPROTO_TCP);								  // 协议，此处采用TCP协议
+
+	// 判断发送套接字是否创建成功
+	if (INVALID_SOCKET == m_sktTCPSender)
+	{
+		// 得到错误代码
+		int iSocketErr = WSAGetLastError();
+
+		// 判断是否是套接字版本不正确
+		if (iSocketErr == WSANOTINITIALISED)// 创建套接字失败，返回不可用的套接字
+			return WSA_CREATE_SOCKET_ERROR;
+	}
+
+	// 连接主机
+	int iErrMsg = connect(m_sktTCPSender, (sockaddr*)&sdServeraddr, sizeof(sdServeraddr));
+	if (iErrMsg < 0)
+		return FALSE;
 
 	//开辟发送缓存区大小为MAXLENGTH字节
 	PST_PACKAGE pstSendPacket = new ST_PACKAGE;
@@ -118,12 +101,14 @@ BOOL UDPCommunications::Send(BYTE abyDestIp[IP_BYTE_LENGTH], UINT uiDesPort,
 			memcpy(pstSendPacket->abyData, pbyBuffer + DATA_BUF_LENGTH * uipacknum, DATA_BUF_LENGTH); //循环复制缓冲区数据到数据包结构体
 
 			// 每次发送DATA_BUF个字节
-			int reti = sendto(m_sktUDPSender, (const char*)pstSendPacket, sizeof(ST_PACKAGE),
-				0, (SOCKADDR*)&sdServeraddr, sizeof(SOCKADDR)); //发送数据包
+			int reti = send(m_sktTCPSender, (const char*)pstSendPacket, sizeof(ST_PACKAGE), 0); //发送数据包
 
 			// 判断是否发送成功
 			if (SOCKET_ERROR == reti) // CCsccLog::DebugPrint("数据发送出错！\n");
+			{
+				shutdown(m_sktTCPSender, SD_SEND);
 				return FALSE;
+			}
 
 			// 一帧数据剩余的数据量
 			uiDataLength -= DATA_BUF_LENGTH;
@@ -145,49 +130,41 @@ BOOL UDPCommunications::Send(BYTE abyDestIp[IP_BYTE_LENGTH], UINT uiDesPort,
 			memcpy(pstSendPacket->abyData, pbyBuffer + uipacknum * DATA_BUF_LENGTH, uiDataLength); //将剩余数据拷贝到数据包中准备发送
 
 			//发送最后一个数据包，数据包中的数据长度为剩余所有字节，且不大于DATA_BUF
-			int reti = sendto(m_sktUDPSender, (const char*)pstSendPacket, sizeof(ST_PACKAGE),
-				0, (sockaddr*)&sdServeraddr, sizeof(sockaddr));
+			int reti = send(m_sktTCPSender, (const char*)pstSendPacket, sizeof(ST_PACKAGE), 0);
 
 			//判断是否发送成功
 			if (SOCKET_ERROR == reti)
+			{
+				shutdown(m_sktTCPSender, SD_SEND);
 				return FALSE;
+			}
 
 			uiDataLength = 0; //表示数据已经发送完成
 			uipacknum++;     //数据包包号加一
 		}
 	}
 
+	shutdown(m_sktTCPSender, SD_SEND);
+	closesocket(m_sktTCPSender);
 	delete pstSendPacket;   //删除数据缓存指针
 	pstSendPacket = NULL;   //置空数据缓存指针
-
 	return TRUE;
 }
 
-/***************************************************************************
-* 函数名称：   SetSender
-* 摘　　要：   
-* 全局影响：   virtual public 
-* 参　　数：   [in]  BYTE abyLocalIp[IP_BYTE_LENGTH]
-* 参　　数：   [in]  UINT uiLocalPort
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalPort)
+BOOL TCPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalPort)
 {
 	USES_CONVERSION;
 
-	if (m_sktUDPSender != INVALID_SOCKET)
-		closesocket(m_sktUDPSender);
+	if (m_sktTCPSender != INVALID_SOCKET)
+		closesocket(m_sktTCPSender);
+
 	// 创建UDP发送套接字
-	m_sktUDPSender = socket(AF_INET,      // 协议地址家族，windows下一般为AF_INET
-		SOCK_DGRAM,   // 协议套接字类型，此处UDP采用数据报型
-		IPPROTO_UDP); // 协议，此处采用UDP协议
+	m_sktTCPSender = socket(AF_INET,      // 协议地址家族，windows下一般为AF_INET
+		SOCK_STREAM,						  // 协议套接字类型，此处UDP采用数据报型
+		IPPROTO_TCP);								  // 协议，此处采用TCP协议
 
 	// 判断发送套接字是否创建成功
-	if (INVALID_SOCKET == m_sktUDPSender)
+	if (INVALID_SOCKET == m_sktTCPSender)
 	{
 		// 得到错误代码
 		int iSocketErr = WSAGetLastError();
@@ -202,7 +179,7 @@ BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalP
 	UINT uiOptlen = sizeof(uiBuflen);	// 缓冲区大小
 
 	// 获取发送缓冲区参数
-	iErrCode = getsockopt(m_sktUDPSender,			// 套接字
+	iErrCode = getsockopt(m_sktTCPSender,			// 套接字
 		SOL_SOCKET,			// 套接字级别，此处选择套接字所在的应用层
 		SO_SNDBUF,			// 将要设置的套接字选项名称，此处为缓冲区大小
 		(char *)&uiBuflen,	// 设置的套接字选项值
@@ -216,7 +193,7 @@ BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalP
 	uiBuflen *= BUFFER_SIZE_TIMES;
 
 	//设定缓冲区大小                                                           
-	iErrCode = setsockopt(m_sktUDPSender, SOL_SOCKET, SO_RCVBUF, (char*)&uiBuflen, uiOptlen);
+	iErrCode = setsockopt(m_sktTCPSender, SOL_SOCKET, SO_RCVBUF, (char*)&uiBuflen, uiOptlen);
 
 	//判断设置缓冲区大小是否异常
 	if (SOCKET_ERROR == iErrCode)
@@ -224,7 +201,7 @@ BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalP
 
 	//检查缓冲区大小是否修改成功
 	unsigned int uiNewRcvBuf;
-	iErrCode = getsockopt(m_sktUDPSender, SOL_SOCKET, SO_SNDBUF, (char*)&uiNewRcvBuf, (int*)&uiOptlen);
+	iErrCode = getsockopt(m_sktTCPSender, SOL_SOCKET, SO_SNDBUF, (char*)&uiNewRcvBuf, (int*)&uiOptlen);
 	if (SOCKET_ERROR == iErrCode || uiNewRcvBuf == uiBuflen)
 		//CCsccLog::DebugPrint("修改系统发送数据缓冲区失败！\n");
 		return WSA_GET_SOCKET_OPT_ERROR;
@@ -232,7 +209,7 @@ BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalP
 	//设置发送端端口重用
 	BOOL bIsReusePort;
 	int iReusePortLen = sizeof(bIsReusePort);
-	iErrCode = setsockopt(m_sktUDPSender, SOL_SOCKET, SO_REUSEADDR, (char*)&bIsReusePort, iReusePortLen);
+	iErrCode = setsockopt(m_sktTCPSender, SOL_SOCKET, SO_REUSEADDR, (char*)&bIsReusePort, iReusePortLen);
 	if (SOCKET_ERROR == iErrCode)//CCsccLog::DebugPrint("设置端口重用失败！\n");
 		return WSA_SET_SOCKET_OPT_ERROR;
 
@@ -249,28 +226,14 @@ BOOL UDPCommunications::SetSender(BYTE abyLocalIp[IP_BYTE_LENGTH], UINT uiLocalP
 	sdClientAddr.sin_port = htons(uiLocalPort);					//端口号,主机字节序转换为网络字节序，等待发送
 
 	//绑定套接字d
-	int iBindErr = bind(m_sktUDPSender, (LPSOCKADDR)&sdClientAddr, sizeof(sdClientAddr));
+	int iBindErr = bind(m_sktTCPSender, (LPSOCKADDR)&sdClientAddr, sizeof(sdClientAddr));
 	if (iBindErr == SOCKET_ERROR)
 		return WSA_BIND_ERROR;
 
 	return TRUE;
 }
 
-
-/***************************************************************************
-* 函数名称：   Receive
-* 摘　　要：   
-* 全局影响：   virtual public 
-* 参　　数：   [inout]  byte *  & pbyBuffer
-* 参　　数：   [inout]  size_t & uiDataLength
-* 参　　数：   [inout]  size_t & uiFrameNum
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::Receive(byte* &pbyBuffer, size_t& uiDataLength, size_t& uiFrameNum)                 
+BOOL TCPCommunications::Receive(byte* &pbyBuffer, size_t& uiDataLength, size_t& uiFrameNum)
 {
 	// init the data
 	PST_PACKAGE pstReceivePacket = new ST_PACKAGE;
@@ -279,36 +242,47 @@ BOOL UDPCommunications::Receive(byte* &pbyBuffer, size_t& uiDataLength, size_t& 
 	size_t packageNum = 0;
 	memset(pbyBuffer, 0, uiDataLength);
 
+	SOCKET fd_client;
+
+	fd_client = accept(m_sktTCPReceiver, (sockaddr *)&stReceiveAddr, &nSize);
+
+	std::cout << "i get info" << std::endl;
+
 	// get the data
 	while (true)
 	{
-		int retVal = recvfrom(m_sktReceiveSender, (char*)pstReceivePacket, sizeof(ST_PACKAGE),
-			0, (struct sockaddr*)(&stReceiveAddr), &nSize);
+		int retVal = recv(fd_client, (char*)pstReceivePacket, sizeof(ST_PACKAGE), 0);
 		if (retVal == SOCKET_ERROR)
 		{
-			closesocket(m_sktReceiveSender);
+			closesocket(fd_client);
 			WSACleanup();
 			delete pstReceivePacket;
 			return FALSE;
 		}
 
+		std::cout << "i get info2" << std::endl;
 		// 说明是第一个包
 		if (0 == pstReceivePacket->uiPackageNum)
 			packageNum = 0;
 
+		std::cout << "i get info3" << std::endl;
 		// 查看输出的空间是否足够
-		if (uiDataLength < pstReceivePacket->uiTotalDataLength)
+		if (uiDataLength < pstReceivePacket->uiTotalDataLength && 0 == pstReceivePacket->uiPackageNum)
 		{
+			std::cout << "i get info10" << std::endl;
 			if (NULL != pbyBuffer)
 				delete[] pbyBuffer;
+			std::cout << "i get info11" << std::endl;
 			pbyBuffer = new byte[pstReceivePacket->uiTotalDataLength];
 			uiDataLength = pstReceivePacket->uiTotalDataLength;
 			memset(pbyBuffer, 0, uiDataLength);
+			uiFrameNum = pstReceivePacket->uiFrameNum;
 		}
-
+		std::cout << "i get info4" << std::endl;
 		// 检查包号是否正确
 		if (packageNum != pstReceivePacket->uiPackageNum)
 		{
+			std::cout << "error:" << packageNum << "," << pstReceivePacket->uiPackageNum << std::endl;
 			if (NULL != pbyBuffer)
 				delete[] pbyBuffer;
 			pbyBuffer = NULL;
@@ -316,73 +290,26 @@ BOOL UDPCommunications::Receive(byte* &pbyBuffer, size_t& uiDataLength, size_t& 
 			delete pstReceivePacket;
 			return FALSE;
 		}
-
+		std::cout << "i get info5" << std::endl;
 		// 组上剩余的包
-		memcpy(pbyBuffer + packageNum*DATA_BUF_LENGTH, 
+		memcpy(pbyBuffer + packageNum*DATA_BUF_LENGTH,
 			pstReceivePacket->abyData, pstReceivePacket->uiDataLength);
 
+		std::cout << "i get info6" << std::endl;
 		// 判断是否已经完全组完了
 		if (DATA_BUF_LENGTH != pstReceivePacket->uiDataLength)
 			break;
-
+		std::cout << "i get info7" << std::endl;
 		packageNum++;
 	}
+	std::cout << "i get info8" << std::endl;
+	closesocket(fd_client);
 
 	delete pstReceivePacket;
 	return TRUE;
 }
 
-
-/***************************************************************************
-* 函数名称：   ReleaseCom
-* 摘　　要：   
-* 全局影响：   virtual protected 
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::ReleaseCom()        // 完成释放代码
-{
-
-	if (m_sktUDPSender != INVALID_SOCKET)
-		closesocket(m_sktUDPSender);
-
-	if (m_sktReceiveSender != INVALID_SOCKET)
-		closesocket(m_sktReceiveSender);
-
-	int iUnInitialErr = 0;					// 函数返回值
-	// 释放套接字库
-	iUnInitialErr = WSACleanup();
-
-	// 判断是否成功释放
-	if (0 != iUnInitialErr)
-	{
-		// 判断错误代码是否是WSANOTINITIALISED
-		if (WSANOTINITIALISED == WSAGetLastError())
-			return false;
-
-		return true;
-	}
-	else
-		return false;
-}
-
-
-/***************************************************************************
-* 函数名称：   AddToAccepter
-* 摘　　要：   
-* 全局影响：   virtual public 
-* 参　　数：   [in]  BYTE abyServerIP[IP_BYTE_LENGTH]
-* 参　　数：   [in]  UINT uiServerPort
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::AddToAccepter(BYTE abyServerIP[IP_BYTE_LENGTH], UINT uiServerPort)
+BOOL TCPCommunications::AddToAccepter(BYTE abyServerIP[IP_BYTE_LENGTH], UINT uiServerPort)
 {
 	if (AddServerObj(abyServerIP, uiServerPort))
 		return TRUE;
@@ -390,31 +317,19 @@ BOOL UDPCommunications::AddToAccepter(BYTE abyServerIP[IP_BYTE_LENGTH], UINT uiS
 		return FALSE;
 }
 
-
-/***************************************************************************
-* 函数名称：   AddServerObj
-* 摘　　要：   
-* 全局影响：   protected 
-* 参　　数：   [in]  BYTE abyServerIp[IP_BYTE_LENGTH]
-* 参　　数：   [in]  UINT uiServerPort
-* 返回值　：   BOOL
-*
-* 修改记录：
-*  [日期]     [作者/修改者]  [修改原因]
-*2017/01/04      饶智博        添加
-***************************************************************************/
-BOOL UDPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiServerPort)
+BOOL TCPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiServerPort)
 {
 	USES_CONVERSION;
 
 	char pcServerIp[IP_CHAR_LENGTH];
 	ByteIpToStringIp(abyServerIp, pcServerIp);
 
-	if (m_sktReceiveSender != INVALID_SOCKET)
-		closesocket(m_sktReceiveSender);
+ 	if (m_sktTCPReceiver != INVALID_SOCKET)
+ 		closesocket(m_sktTCPReceiver);
+
 	//创建UDP通信套接字
-	m_sktReceiveSender = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (INVALID_SOCKET == m_sktReceiveSender)   // CCsccLog::DebugPrint("创建服务器端UDP通信套接字错误！\n");
+	m_sktTCPReceiver = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (INVALID_SOCKET == m_sktTCPReceiver)   // CCsccLog::DebugPrint("创建服务器端UDP通信套接字错误！\n");
 		return FALSE;
 
 	//定义错误代码
@@ -426,7 +341,7 @@ BOOL UDPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiSe
 	UINT uiOptlen = sizeof(uiBuflen);
 
 	//获取发送缓冲区参数
-	iErrCode = getsockopt(m_sktReceiveSender,		//套接字
+	iErrCode = getsockopt(m_sktTCPReceiver,		//套接字
 		SOL_SOCKET,			//套接字级别，此处选择套接字所在的应用层
 		SO_SNDBUF,			//将要设置的套接字选项名称，此处为缓冲区大小
 		(char *)&uiBuflen,	//设置的套接字选项值
@@ -440,7 +355,7 @@ BOOL UDPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiSe
 	uiBuflen *= BUFFER_SIZE_TIMES;
 
 	//设定缓冲区大小                                                           
-	iErrCode = setsockopt(m_sktReceiveSender, SOL_SOCKET, SO_RCVBUF, (char *)&uiBuflen, uiOptlen);
+	iErrCode = setsockopt(m_sktTCPReceiver, SOL_SOCKET, SO_RCVBUF, (char *)&uiBuflen, uiOptlen);
 
 	//判断设置缓冲区大小是否异常
 	if (SOCKET_ERROR == iErrCode)
@@ -448,7 +363,7 @@ BOOL UDPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiSe
 
 	// 检查缓冲区大小是否修改成功
 	unsigned int uiNewRcvBuf;
-	iErrCode = getsockopt(m_sktReceiveSender, SOL_SOCKET, SO_SNDBUF, (char*)&uiNewRcvBuf, (int*)&uiOptlen);
+	iErrCode = getsockopt(m_sktTCPReceiver, SOL_SOCKET, SO_SNDBUF, (char*)&uiNewRcvBuf, (int*)&uiOptlen);
 	if (SOCKET_ERROR == iErrCode || uiNewRcvBuf == uiBuflen) // CCsccLog::DebugPrint("修改系统发送数据缓冲区失败！\n");
 		return FALSE;
 
@@ -459,10 +374,37 @@ BOOL UDPCommunications::AddServerObj(BYTE abyServerIp[IP_BYTE_LENGTH], UINT uiSe
 	sdServerAddr.sin_port = htons(uiServerPort);				// 端口号,主机字节序三转换为网络字节序
 
 	//绑定套接字
-	int iBindErr = bind(m_sktReceiveSender, (LPSOCKADDR)&sdServerAddr, sizeof(sdServerAddr));
+	int iBindErr = bind(m_sktTCPReceiver, (LPSOCKADDR)&sdServerAddr, sizeof(sdServerAddr));
 	if (iBindErr == SOCKET_ERROR)   // CCsccLog::DebugPrint("绑定接收套接字出错！\n");
 		return FALSE;
 
+	listen(m_sktTCPReceiver, MAX_LISTEN_NUM);
 	//SetServerObj(m_sktReceiveSender, abyServerIp, uiServerPort);			// 将UDP通信套接字加入到服务器端对象中
 	return TRUE;
+}
+
+BOOL TCPCommunications::ReleaseCom()
+{
+	if (m_sktTCPSender != INVALID_SOCKET)
+		closesocket(m_sktTCPSender);
+
+	if (m_sktTCPReceiver != INVALID_SOCKET)
+		closesocket(m_sktTCPReceiver);
+
+	int iUnInitialErr = 0;					// 函数返回值
+	// 释放套接字库
+	iUnInitialErr = WSACleanup();
+
+	// 判断是否成功释放
+	if (0 != iUnInitialErr)
+	{
+		// 判断错误代码是否是WSANOTINITIALISED
+		if (WSANOTINITIALISED == WSAGetLastError())
+			return FALSE;
+
+		return TRUE;
+	}
+	else
+		return FALSE;
+
 }

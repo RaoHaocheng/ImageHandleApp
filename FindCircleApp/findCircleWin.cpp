@@ -5,7 +5,8 @@
 #include <QImage>
 #include <vector>
 #include "../Communications/communications.h"
-#pragma comment(lib,"communications.lib")
+#include "../Communications/ShareMemory.h"
+#pragma comment(lib,"communicationsd.lib")
 
 
 /***************************************************************************
@@ -270,38 +271,40 @@ void FindCircleWin::sltShowPopMenu(const QPoint& point)
 ***************************************************************************/
 void FindCircleWin::test()
 {
-	//"LogFile.log", "D:/Program/ImageHandleApp/x64/Debug/"
-	//LogHandler::SetFilePath();
-	LogHandler::SetWinLogHandlerState(false);
-	WARNING_LOG("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
-	LogHandler::Warning("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
-	LogHandler::Error("%s 1%d 2%f 3%c 4%x 5%o 6%%", "hello", 10, 28.888, 'm', 50, 16);
-	LogHandler::Info("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
-	LogHandler::Debug("%s 1%d 2%f 3%c 4%x 5%o 6%%", "hello", 10, 28.888, 'm', 50, 16);
+	LogHandler::SetLogHandlerState(false);
+	Communications* c = Communications::CreateCommunications(COMMUNICATIONS_TYPE::TCP);
 
+	PST_IP_INFO ipInfo = new ST_IP_INFO;
+	UINT i;
+	size_t frameNum = 0;
+	c->InitCom();
+	c->GetIpAddr(ipInfo, i);
 
+	char dst[4];
+	dst[0] = 115;
+	dst[1] = 28;
+	dst[2] = 14;
+	dst[3] = 79;
+	char buf[5069];
+	if (!c->SetSender(ipInfo->abyIPAddr, 6000))
+	{
+		std::cout << "set Sender fail!";
+	}
+	while (true)
+	{
+		memset(buf, 0, sizeof(buf));
+		sprintf_s(buf, 5069, "Given the complex background, small circular marker, and slow and inaccurate locating in measuring the pyramid angle of helicopter blades, a new locating method for the circular marker is proposed.First, the Edge Drawing Parameter - Free Edge Segment Detector Algorithm is adopted to inspect the image's edge and to extract the connected domain of the edge image.Second, the circularity, inertia, and convexity of the connected domain are employed to lter the non - circular contour from the connected domain in the image.Finally, least - square circle tting is used to complete the accurate locating of the circular marker.The simulation and real experiments show that the circular markers can be inspected and located with the proposed algorithm in complex scenes with high speed and good accuracy.In addition, the proposed algorithm had strong anti - interference performance and could be used to improve the speed and accuracy of measurement for the helicopter blades pyramid angle against a complex background.");
+		c->Send((BYTE*)dst, 6000, (BYTE*)buf, 5069, frameNum);
+		frameNum++;
+		Sleep(1000);
+		//WARNING_LOG(buf);
+		//std::cout << buf;
+	}
+	    
 	return;
 
- 	FindCircularMarker f;
- 	QImage img = m_paintWidget->Img();
- 	//IplImage pImage = QImage2cvIplImage(img);
- 	cv::Mat src = QImage2Mat(img);
- 
- 	cv::Mat dst;
- 	//f.findContoursByEDPF(src, dst, 1.0);
- 	//f.findContoursByED(src, dst);
-	std::vector<ST_CENTER> centers;
-	ST_CENTER center;
-	center.location.x = 436;
-	center.location.y = 350;
-	center.radius = 200;
-	centers.push_back(center);
-	f.AccuaryCircleLocation(src, centers);
-	//f.findContoursByCannyLine(src, dst);
- 
- 	img = Mat2QImage(dst);
-	m_paintWidget->setImg(img);
-
+	//////////////////////////////
+// 	LogHandler::SetLogHandlerState(false);
 // 	Communications* c = Communications::CreateCommunications(UDP);
 // 	char* ipChar = "127.168.12.1";
 // 	char ipchar[16];
@@ -311,9 +314,67 @@ void FindCircleWin::test()
 // 	c->InitCom();
 // 	c->GetIpAddr(ipInfo, i);
 // 	c->GetIpInfo(ipInfo);
+// 	WARNING_LOG((char*)ipInfo->abyIPAddr);
 // 	ipInfo->abyGateWay;
-// 	c->IPStringtoByteArray(ipChar, ip);
+// 	c->IPStringtoByteArray((char*)&ipInfo->abyIPAddr, ip);
 // 	c->ByteIpToStringIp(ip, ipchar);
+// 
+// 	return;
+// 
+// 	ShareMemory* sharemem = new ShareMemory();
+// 	//sharemem.WriteMem((BYTE*)"sa", sizeof("sa"));
+// 	char buf[255];
+// 	bool ok;
+// 	ok = sharemem->OpenShareMemory("hello");
+// 	int x=0;
+// 	while (true)
+// 	{
+// 		x++;
+// 		if (ok)
+// 			sharemem->ReadMem((BYTE*)buf, 255);
+// 		else
+// 		{
+// 			sprintf_s(buf, 255, "%d", x);
+// 			sharemem->WriteMem((BYTE*)buf, 255);
+// 		}
+// 
+// 		WARNING_LOG(buf);
+// 	}
+// 
+// 	delete sharemem;
+// 	return;
+// 
+// 	//"LogFile.log", "D:/Program/ImageHandleApp/x64/Debug/"
+// 	//LogHandler::SetFilePath();
+// 	LogHandler::SetWinLogHandlerState(false);
+// 	WARNING_LOG("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
+// 	LogHandler::Warning("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
+// 	LogHandler::Error("%s 1%d 2%f 3%c 4%x 5%o 6%%", "hello", 10, 28.888, 'm', 50, 16);
+// 	LogHandler::Info("%s 1%d 2%f 3%c 4%x 5%o 6%%\n", "hello", 10, 28.888, 'm', 50, 16);
+// 	LogHandler::Debug("%s 1%d 2%f 3%c 4%x 5%o 6%%", "hello", 10, 28.888, 'm', 50, 16);
+// 
+// 
+// 	return;
+// 
+//  	FindCircularMarker f;
+//  	QImage img = m_paintWidget->Img();
+//  	//IplImage pImage = QImage2cvIplImage(img);
+//  	cv::Mat src = QImage2Mat(img);
+//  
+//  	cv::Mat dst;
+//  	//f.findContoursByEDPF(src, dst, 1.0);
+//  	//f.findContoursByED(src, dst);
+// 	std::vector<ST_CENTER> centers;
+// 	ST_CENTER center;
+// 	center.location.x = 436;
+// 	center.location.y = 350;
+// 	center.radius = 200;
+// 	centers.push_back(center);
+// 	f.AccuaryCircleLocation(src, centers);
+// 	//f.findContoursByCannyLine(src, dst);
+//  
+//  	img = Mat2QImage(dst);
+// 	m_paintWidget->setImg(img);
 }
 
 /***************************************************************************

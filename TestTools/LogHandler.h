@@ -8,7 +8,8 @@
 #define ERROR_LOG    LogHandler::Error
 #define INFO_LOG     LogHandler::Info
 #define DEBUG_LOG    LogHandler::Debug
-
+#define OPEN_LOG     LogHandler::SetLogHandlerState
+#define OPEN_WIN_LOG LogHandler::SetWinLogHandlerState
 
 class DLLS_PORT LogHandler
 {
@@ -30,6 +31,7 @@ public:
 	static void DeleteLogHandler();
 
 public:
+	// use the macro
 	static void SetFilePath(const char* fileName = NULL, const char* filePath = NULL);
 	static void SetLogHandlerState(bool ok);
 	static void SetWinLogHandlerState(bool ok);
@@ -59,5 +61,4 @@ private:
 	static char* m_infoBuffer;         
 	static char* m_msgBuffer;
 };
-
 #endif

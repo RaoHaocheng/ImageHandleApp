@@ -12,11 +12,11 @@ const char* FILE_TITLE = "/*************************Welcome to use the LogHandle
 
 /***************************************************************************
 * 函数名称：   LogHandler
-* 摘　　要：   
-* 全局影响：   private 
+* 摘　　要：
+* 全局影响：   private
 * 参　　数：   [in]  char * fileName
 * 参　　数：   [in]  char * filePath
-* 返回值　：   
+* 返回值　：
 *
 * 修改记录：
 *  [日期]     [作者/修改者]  [修改原因]
@@ -29,9 +29,9 @@ LogHandler::LogHandler(const char* fileName /* = NULL */, const char* filePath /
 
 /***************************************************************************
 * 函数名称：   ~LogHandler
-* 摘　　要：   
-* 全局影响：   private 
-* 返回值　：   
+* 摘　　要：
+* 全局影响：   private
+* 返回值　：
 *
 * 修改记录：
 *  [日期]     [作者/修改者]  [修改原因]
@@ -52,8 +52,8 @@ LogHandler::~LogHandler()
 // use this function create or delete object, if filePath != null, we use it instead of fileName
 /***************************************************************************
 * 函数名称：   CreateLogHandler
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  char * fileName
 * 参　　数：   [in]  char * filePath
 * 返回值　：   LogHandler*
@@ -72,8 +72,8 @@ LogHandler* LogHandler::CreateLogHandler(const char* fileName, const char* fileP
 
 /***************************************************************************
 * 函数名称：   DeleteLogHandler
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 返回值　：   void
 *
 * 修改记录：
@@ -90,8 +90,8 @@ void LogHandler::DeleteLogHandler()
 
 /***************************************************************************
 * 函数名称：   Warning
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  char * info
 * 返回值　：   void
 *
@@ -99,19 +99,20 @@ void LogHandler::DeleteLogHandler()
 *  [日期]     [作者/修改者]  [修改原因]
 *2016/12/25      饶智博        添加
 ***************************************************************************/
-void LogHandler::Warning(const char* msg,...)
+void LogHandler::Warning(const char* msg, ...)
 {
 	if (!m_logStart&&!m_winLogStart)
 		return;
 
 	ResetBuffer();
 
-	va_list arg_ptr;       va_start(arg_ptr, msg);
+	va_list arg_ptr;
+	va_start(arg_ptr, msg);
 	DecodeMSG(msg, arg_ptr, m_msgBuffer);
 	va_end(arg_ptr);
 
 	GenerateInfo(MSGType::WarningType, m_infoBuffer, m_msgBuffer);
-
+	
 	if (m_logStart)
 		WriteFile(m_infoBuffer);
 
@@ -121,8 +122,8 @@ void LogHandler::Warning(const char* msg,...)
 
 /***************************************************************************
 * 函数名称：   Error
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  char * info
 * 返回值　：   void
 *
@@ -153,8 +154,8 @@ void LogHandler::Error(const char* msg, ...)
 
 /***************************************************************************
 * 函数名称：   Debug
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  char * info
 * 返回值　：   void
 *
@@ -185,8 +186,8 @@ void LogHandler::Debug(const char* msg, ...)
 
 /***************************************************************************
 * 函数名称：   Info
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  char * info
 * 返回值　：   void
 *
@@ -217,8 +218,8 @@ void LogHandler::Info(const char* msg, ...)
 
 /***************************************************************************
 * 函数名称：   Init
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  char * fileName
 * 参　　数：   [in]  char * filePath
 * 返回值　：   void
@@ -234,8 +235,8 @@ void LogHandler::Init(const char* fileName /* = NULL */, const char* filePath /*
 
 /***************************************************************************
 * 函数名称：   SetFilePath
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  char * fileName
 * 参　　数：   [in]  char * filePath
 * 返回值　：   void
@@ -257,8 +258,8 @@ void LogHandler::SetFilePath(const char* fileName /* = NULL */, const char* file
 
 /***************************************************************************
 * 函数名称：   WriteFile
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  char * info
 * 返回值　：   void
 *
@@ -276,14 +277,15 @@ void LogHandler::WriteFile(const char* info)
 		SetFilePath();
 
 	(*m_logFile) << info;
+
 	if (!CheckInfoEnd(info, "\n"))
 		(*m_logFile) << "\n";
 }
 
 /***************************************************************************
 * 函数名称：   SetLogHandlerState
-* 摘　　要：   
-* 全局影响：   public static 
+* 摘　　要：
+* 全局影响：   public static
 * 参　　数：   [in]  bool ok
 * 返回值　：   void
 *
@@ -293,7 +295,7 @@ void LogHandler::WriteFile(const char* info)
 ***************************************************************************/
 void LogHandler::SetLogHandlerState(bool ok)
 {
-	m_logStart = ok; 
+	m_logStart = ok;
 }
 
 void LogHandler::SetWinLogHandlerState(bool ok)
@@ -303,8 +305,8 @@ void LogHandler::SetWinLogHandlerState(bool ok)
 
 /***************************************************************************
 * 函数名称：   OpenFile
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  const char * fileName
 * 参　　数：   [in]  const char * filePath
 * 返回值　：   void
@@ -357,8 +359,8 @@ void LogHandler::OpenFile(const char* fileName /* = NULL */, const char* filePat
 
 /***************************************************************************
 * 函数名称：   CloseFile
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 返回值　：   void
 *
 * 修改记录：
@@ -377,8 +379,8 @@ void LogHandler::CloseFile()
 
 /***************************************************************************
 * 函数名称：   GetLocationTime
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  char * currentTime
 * 返回值　：   void
 *
@@ -391,24 +393,24 @@ void LogHandler::GetLocationTime(char* currentTime)
 	time_t nowtime;
 	nowtime = time(NULL);
 	tm* t = new tm;
-	localtime_s(t,&nowtime);
+	localtime_s(t, &nowtime);
 	const int STANDARD_YEAR = 1900;
 	const int STANDARD_MON = 1;
 
 	sprintf_s(currentTime, BUFFER_SIZE, "Date:%d-%02d-%02d Time:%02d:%02d:%02d",
-			  t->tm_year + STANDARD_YEAR,
-			  t->tm_mon + STANDARD_MON,
-			  t->tm_mday,
-		      t->tm_hour,
-		      t->tm_min,
-		      t->tm_sec);
+		t->tm_year + STANDARD_YEAR,
+		t->tm_mon + STANDARD_MON,
+		t->tm_mday,
+		t->tm_hour,
+		t->tm_min,
+		t->tm_sec);
 	delete t;
 }
 
 /***************************************************************************
 * 函数名称：   GenerateInfo
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  MSGType type
 * 参　　数：   [in]  char * msg
 * 参　　数：   [in]  const char * info
@@ -451,13 +453,13 @@ void LogHandler::GenerateInfo(MSGType type, char* info, const char* msg)
 		break;
 	}
 
-	memcpy(&(info[len]), msgBuffer, strlen(msgBuffer)+1);
+	memcpy(&(info[len]), msgBuffer, strlen(msgBuffer) + 1);
 }
 
 /***************************************************************************
 * 函数名称：   DecodeMSG
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  const char * pfmt
 * 参　　数：   [in]  va_list arg_ptr
 * 参　　数：   [in]  char * msg
@@ -475,17 +477,15 @@ void LogHandler::DecodeMSG(const char* pfmt, va_list arg_ptr, char* msg)
 	char vargch = 0;
 	size_t len = 0;
 
+	// get the value via function type value = va_arg(va_list,type);
 	while (*pfmt)
 	{
 		if (*pfmt == '%')
 		{
 			switch (*(++pfmt))
 			{
-
 			case 'c':
 				vargch = va_arg(arg_ptr, char);
-				/*    va_arg(ap, type), if type is narrow type (char, short, float) an error is given in strict ANSI
-				mode, or a warning otherwise.In non-strict ANSI mode, 'type' is allowed to be any expression. */
 				sprintf_s(msg + len, BUFFER_SIZE, "%c", vargch);
 				len = strlen(msg);
 				break;
@@ -497,8 +497,6 @@ void LogHandler::DecodeMSG(const char* pfmt, va_list arg_ptr, char* msg)
 				break;
 			case 'f':
 				vargflt = va_arg(arg_ptr, double);
-				/*    va_arg(ap, type), if type is narrow type (char, short, float) an error is given in strict ANSI
-				mode, or a warning otherwise.In non-strict ANSI mode, 'type' is allowed to be any expression. */
 				sprintf_s(msg + len, BUFFER_SIZE, "%f", vargflt);
 				len = strlen(msg);
 				break;
@@ -511,6 +509,12 @@ void LogHandler::DecodeMSG(const char* pfmt, va_list arg_ptr, char* msg)
 			case 'O':
 				vargint = va_arg(arg_ptr, int);
 				sprintf_s(msg + len, BUFFER_SIZE, "%o", vargint);
+				len = strlen(msg);
+				break;
+			case 'u':
+			case 'U':
+				vargint = va_arg(arg_ptr, int);
+				sprintf_s(msg + len, BUFFER_SIZE, "%u", vargint);
 				len = strlen(msg);
 				break;
 			case 'x':
@@ -538,8 +542,8 @@ void LogHandler::DecodeMSG(const char* pfmt, va_list arg_ptr, char* msg)
 
 /***************************************************************************
 * 函数名称：   ResetBuffer
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 返回值　：   void
 *
 * 修改记录：
@@ -559,8 +563,8 @@ void LogHandler::ResetBuffer()
 
 /***************************************************************************
 * 函数名称：   ShowInfo
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  const char * info
 * 返回值　：   void
 *
@@ -571,14 +575,14 @@ void LogHandler::ResetBuffer()
 void LogHandler::ShowInfo(const char* info)
 {
 	OutputDebugString(m_infoBuffer);
-	if (!CheckInfoEnd(info,"\n"))
+	if (!CheckInfoEnd(info, "\n"))
 		OutputDebugString("\n");
 }
 
 /***************************************************************************
 * 函数名称：   CheckInfoEnd
-* 摘　　要：   
-* 全局影响：   private static 
+* 摘　　要：
+* 全局影响：   private static
 * 参　　数：   [in]  const char * info
 * 参　　数：   [in]  const char * end
 * 返回值　：   bool
@@ -599,8 +603,12 @@ bool LogHandler::CheckInfoEnd(const char* info, const char* end)
 	memset(infoEnd, 0, infoLen);
 	memcpy(infoEnd, info + infoLen - endLen, endLen);
 
+	bool ret = false;
 	if (0 == strcmp(infoEnd, end))
-		return true;
+		ret = true;
 	else
-		return false;
+		ret = false;
+
+	delete[] infoEnd;
+	return ret;
 }

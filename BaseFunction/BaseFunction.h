@@ -7,6 +7,7 @@
 
 #include "ThreadManage.h"      // 处理线程的相关类
 #include "CommandLineParse.h"  // 命令行处理类
+#include "MemoryPool.h"        // 内存池
 
 
 #endif // !BASEFUNCTION_H

@@ -30,6 +30,7 @@
     <ClInclude Include="EDLib.h" />
     <ClInclude Include="FindCircularMarker.h" />
     <ClInclude Include="FindCountersMethod.h" />
+    <ClInclude Include="LineStructure.hh" />
     <ClInclude Include="MetaLine.h" />
     <ClInclude Include="QuickSort.h" />
     <ClInclude Include="types.h" />
@@ -144,12 +145,16 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

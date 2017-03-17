@@ -181,7 +181,8 @@ void FindCircleWin::iniUi()
 	QAction *drawCircleAction = imgHandleMenu->addAction(QStringLiteral("画圆"));
 	QAction *thresholdAction = imgHandleMenu->addAction(QStringLiteral("阈值分割"));
 	QAction *batAction = imgHandleMenu->addAction(QStringLiteral("批处理"));
-	QAction *edpfAction = imgHandleMenu->addAction(QStringLiteral("edpf"));
+	QAction *eDAction = imgHandleMenu->addAction(QStringLiteral("ED"));
+	QAction *edpfAction = imgHandleMenu->addAction(QStringLiteral("EDPF"));
 	QAction *batEdpfAction = imgHandleMenu->addAction(QStringLiteral("edpf批处理"));
 	QAction *drawConnectedDomainAction = imgHandleMenu->addAction(QStringLiteral("描绘连通域"));
 	
@@ -192,6 +193,7 @@ void FindCircleWin::iniUi()
 	connect(thresholdAction, SIGNAL(triggered()), this, SLOT(threadshold()));
 	connect(batAction, SIGNAL(triggered()), this, SLOT(batImgHandle()));
 	connect(batCannyAction, SIGNAL(triggered()), this, SLOT(batCannyImgHandle()));
+	connect(eDAction, SIGNAL(triggered()), this, SLOT(edgeDrawing()));
 	connect(edpfAction, SIGNAL(triggered()), this, SLOT(edpf()));
 	connect(batEdpfAction, SIGNAL(triggered()), this, SLOT(batEdpf()));
 	connect(drawConnectedDomainAction, SIGNAL(triggered()), this, SLOT(drawConnectedDomain()));
@@ -290,6 +292,7 @@ void FindCircleWin::test()
 	{
 		std::cout << "set Sender fail!";
 	}
+
 	while (true)
 	{
 		memset(buf, 0, sizeof(buf));
@@ -457,7 +460,7 @@ void FindCircleWin::findCircleCIC()
 	params.filterByColor = false;
 	params.minThreshold = 5;
 	params.thresholdStep = 5;
-	params.minArea = 10;
+	params.minArea = 100;
 //    	params.minConvexity = 0.8f;
 //    	params.minInertiaRatio = 0.73f;
 //    	params.minCircularity = 0.8f;
@@ -476,7 +479,7 @@ void FindCircleWin::findCircleCIC()
 	cv::Mat keypointsImage;
 	
 	//f.FindCircle(cv::Mat(&pImage), params, centers);
-	f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, 1.0, false);
+	f.FindCircleByCICImproved(cv::Mat(&pImage), params, centers, false);
 	//f.FindCircleByCIC(cv::Mat(&pImage), params, centers, 1.0, false);
 	//f.FindCircleByThreshold(cv::Mat(&pImage), params, centers, false);
 	DrawCircle(cv::Mat(&pImage), keypointsImage, centers);
@@ -670,7 +673,7 @@ void FindCircleWin::threadshold()
 
 	cv::Mat keypointsImage;
 	int ithreadshold = Otsu(&pImage);
-	cv::threshold(cv::Mat(&pImage), keypointsImage, ithreadshold, 255, cv::THRESH_BINARY);
+	cv::threshold(cv::Mat(&pImage), keypointsImage, 74, 255, cv::THRESH_BINARY);
 
 	img = Mat2QImage(keypointsImage);
 	m_paintWidget->setImg(img);
@@ -892,7 +895,22 @@ void FindCircleWin::edpf()
 
 	cv::Mat dst;
 	f.findContoursByEDPF(src, dst, 1.0);
-	//f.findContoursByED(&pImage, dst);
+	//f.findContoursByED(src, dst);
+
+	img = Mat2QImage(dst);
+	m_paintWidget->setImg(img);
+}
+
+void FindCircleWin::edgeDrawing()
+{
+	FindContoursMethod f;
+	QImage img = m_paintWidget->Img();
+	//IplImage pImage = QImage2cvIplImage(img);
+	cv::Mat src = QImage2Mat(img);
+
+	cv::Mat dst;
+	//f.findContoursByEDPF(src, dst, 1.0);
+	f.findContoursByEDLib(src, dst);
 
 	img = Mat2QImage(dst);
 	m_paintWidget->setImg(img);

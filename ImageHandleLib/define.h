@@ -94,6 +94,7 @@ const double GAUSSIAN_MEAN = 0.0;          // 高斯分布的平均值为0;
 const double GAUSSIAN_VARIANCE = 1.0;      // 高斯分布的方差为1;
 
 const UINT CONVERT_SCALE = 255;            // 转换比例
+#define M_PI 3.14159265358979323846 
 
 // 常用的数据结构
 // 点阵
@@ -131,5 +132,13 @@ typedef struct CENTER
 	double radius;
 	double confidence;
 }ST_CENTER, *PST_CENTER;
+
+// 坐标的信息
+typedef struct COORDINATE_INFO
+{
+	size_t x;
+	size_t y;
+	size_t z;
+}ST_COORDINATE_INFO, *PST_COORDINATE_INFO;
 
 #endif

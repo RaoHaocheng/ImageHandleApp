@@ -57,6 +57,16 @@ DLLS_PORT BOOL AnalysisCluster(const std::vector<cv::Point> contour, const cv::M
 // 是否共线
 DLLS_PORT BOOL IsThreePointInLine(const cv::Point2f p1, const cv::Point2f p2, const cv::Point2f p3
 	, const double dbDifPrecision = 0.2);
+// 是否共面
+DLLS_PORT BOOL IsFourPointInFace(const cv::Point3f p1, const cv::Point3f p2,
+	const cv::Point3f p3, const cv::Point3f p4, const double dbDifPrecision);
+DLLS_PORT cv::Point3f Point3Cross(const cv::Point3f p1, const cv::Point3f p2);
+DLLS_PORT cv::Point3f Point3Dot(const cv::Point3f p1, const cv::Point3f p2);
+DLLS_PORT double Point3Dis(const cv::Point3f p1, const cv::Point3f p2);
+DLLS_PORT cv::Point3f Point3Dif(const cv::Point3f p1, const cv::Point3f p2);
+DLLS_PORT cv::Point3f Point3Add(const cv::Point3f p1, const cv::Point3f p2);
+DLLS_PORT double Point3Modulus(const cv::Point3f p1);
+
 
 // 补圆
 DLLS_PORT void ConvertClosedContour(std::vector<cv::Point> &contours);
@@ -88,5 +98,7 @@ DLLS_PORT void _AdaptiveFindThreshold(CvMat *dx, CvMat *dy, double *low, double 
 
 // color produce
 DLLS_PORT cv::Scalar GetSevenColor(int iColorCode);
+DLLS_PORT void GetSevenColor(const int iColorCode, uchar& R, uchar& G, uchar& B);
+
 
 #endif // !BASEIMAGEHANDLEFUNCTION_H

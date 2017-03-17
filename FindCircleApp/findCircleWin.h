@@ -52,6 +52,7 @@ private slots:
 	void threadshold();
 	void batImgHandle();		   // 需要修改，目前该功能仅用于测试
 	void batCannyImgHandle();      // 需要修改，目前该功能仅用于测试
+	void edgeDrawing();
 	void edpf();
 	void batEdpf();                // FIXME：need more para;
 	void goBack();

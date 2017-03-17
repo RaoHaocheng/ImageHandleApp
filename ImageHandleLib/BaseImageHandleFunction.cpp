@@ -639,6 +639,151 @@ DLLS_PORT BOOL IsThreePointInLine(const cv::Point2f p1, const cv::Point2f p2, co
 }
 
 /***************************************************************************
+* 函数名称：   IsFourPointInFace
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point2f p1
+* 参　　数：   [in]  const cv::Point2f p2
+* 参　　数：   [in]  const cv::Point2f p3
+* 参　　数：   [in]  const cv::Point2f p4
+* 参　　数：   [in]  const double dbDifPrecision
+* 返回值　：   DLLS_PORT BOOL
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT BOOL IsFourPointInFace(const cv::Point3f p1, const cv::Point3f p2,
+	const cv::Point3f p3, const cv::Point3f p4, const double dbDifPrecision)
+{
+	double dbVolume = Point3Modulus(Point3Dot(Point3Dif(p1, p4), 
+		Point3Cross(Point3Dif(p2, p4), Point3Dif(p3, p4)))) / 6;
+
+	if (dbVolume < dbDifPrecision)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
+
+/***************************************************************************
+* 函数名称：   Point3Cross
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point3f p1
+* 参　　数：   [in]  const cv::Point3f p2
+* 返回值　：   DLLS_PORT cv::Point3f
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT cv::Point3f Point3Cross(const cv::Point3f p1, const cv::Point3f p2)
+{
+	cv::Point3f point;
+	point.x = p1.y * p2.z - p1.z * p2.y;
+	point.y = p1.z * p2.x - p1.x * p2.z;
+	point.z = p1.x * p2.y - p1.y * p2.x;
+	return point;
+}
+/***************************************************************************
+* 函数名称：   Point3Dot
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point3f p1
+* 参　　数：   [in]  const cv::Point3f p2
+* 返回值　：   DLLS_PORT cv::Point3f
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT cv::Point3f Point3Dot(const cv::Point3f p1, const cv::Point3f p2)
+{
+	cv::Point3f point;
+	point.x = p1.x * p2.x;
+	point.y = p1.y * p2.y;
+	point.z = p1.z * p2.z;
+	return point;
+}
+
+/***************************************************************************
+* 函数名称：   Point3Dis
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point3f p1
+* 参　　数：   [in]  const cv::Point3f p2
+* 返回值　：   DLLS_PORT double
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT double Point3Dis(const cv::Point3f p1, const cv::Point3f p2)
+{
+	return Point3Modulus(Point3Dif(p1, p2));
+}
+
+/***************************************************************************
+* 函数名称：   Point3Dif
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point3f p1
+* 参　　数：   [in]  const cv::Point3f p2
+* 返回值　：   DLLS_PORT cv::Point3f
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT cv::Point3f Point3Dif(const cv::Point3f p1, const cv::Point3f p2)
+{
+	cv::Point3f point;
+	point.x = p1.x - p2.x;
+	point.y = p1.y - p2.y;
+	point.z = p1.z - p2.z;
+	return point;
+}
+/***************************************************************************
+* 函数名称：   Point3Add
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point3f p1
+* 参　　数：   [in]  const cv::Point3f p2
+* 返回值　：   DLLS_PORT cv::Point3f
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT cv::Point3f Point3Add(const cv::Point3f p1, const cv::Point3f p2)
+{
+	cv::Point3f point;
+	point.x = p1.x + p2.x;
+	point.y = p1.y + p2.y;
+	point.z = p1.z + p2.z;
+	return point;
+}
+
+/***************************************************************************
+* 函数名称：   Point3Modulus
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  const cv::Point3f p1
+* 返回值　：   DLLS_PORT double
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/02/25      饶智博        添加
+***************************************************************************/
+DLLS_PORT double Point3Modulus(const cv::Point3f p1)
+{
+	return sqrtf(powf(p1.x, 2) + powf(p1.y, 2) + powf(p1.z, 2));
+}
+
+
+/***************************************************************************
 * 函数名称：   IsInCircle
 * 摘　　要：
 * 全局影响：   public
@@ -1102,11 +1247,11 @@ DLLS_PORT void AutoCanny(const cv::Mat & src, cv::Mat & dst)
 	// 使用Otsu计算出阈值
 	int cannyThreshold = Otsu(pImage);
 	// 使用canny算子来计算图片,至于为什么*2...我只能说效果好
-//	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.2 , 3);
+	cvCanny(pImage, pCannyImage, cannyThreshold*0.8, cannyThreshold*1.2 , 3);
 //	cvCanny(pImage, pCannyImage, 40, 100, 3);
 
 
-	cvCanny(pImage, pCannyImage, cannyThreshold*0.1, cannyThreshold, 3);
+	//cvCanny(pImage, pCannyImage, cannyThreshold*0.1, cannyThreshold, 3);
 
 // 	double low, high;
 // 	AdaptiveFindThreshold(pImage, &low, &high);
@@ -1216,6 +1361,17 @@ DLLS_PORT void _AdaptiveFindThreshold(CvMat *dx, CvMat *dy, double *low, double 
 	cvReleaseHist(&hist);
 }
 
+/***************************************************************************
+* 函数名称：   GetSevenColor
+* 摘　　要：   
+* 全局影响：   public 
+* 参　　数：   [in]  int iColorCode
+* 返回值　：   DLLS_PORT cv::Scalar
+*
+* 修改记录：
+*  [日期]     [作者/修改者]  [修改原因]
+*2017/01/13      饶智博        添加
+***************************************************************************/
 DLLS_PORT cv::Scalar GetSevenColor(int iColorCode)
 {
 	// return the color(rgb)
@@ -1238,5 +1394,53 @@ DLLS_PORT cv::Scalar GetSevenColor(int iColorCode)
 	default:
 		return cv::Scalar(0, 0, 0);
 		break;
+	}
+}
+
+DLLS_PORT void GetSevenColor(const int iColorCode, uchar& R, uchar& G, uchar& B)
+{
+	// return the color(rgb)
+	switch (iColorCode)
+	{
+	case 0:
+		R = 255;
+		G = 0;
+		B = 0;
+		return;
+	case 1:
+		R = 255;
+		G = 128;
+		B = 0;
+		return;
+	case 2:
+		R = 255;
+		G = 255;
+		B = 0;
+		return;
+	case 3:
+		R = 0;
+		G = 255;
+		B = 0;
+		return;
+	case 4:
+		R = 0;
+		G = 255;
+		B = 255;
+		return ;
+	case 5:
+		R = 0;
+		G = 0;
+		B = 255;
+		return;
+	case 6:
+		R = 128;
+		G = 0;
+		B = 255;
+		return;
+	default:
+		R = 0;
+		G = 0;
+		B = 0;
+		return;
 	}
 }

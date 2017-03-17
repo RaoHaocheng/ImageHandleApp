@@ -90,10 +90,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -126,12 +130,14 @@
   <ItemGroup>
     <ClInclude Include="communications.h" />
     <ClInclude Include="define.h" />
+    <ClInclude Include="NoNamePipe.h" />
     <ClInclude Include="TCPCommunications.h" />
     <ClInclude Include="UDPCommunications.h" />
     <ClInclude Include="ShareMemory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="communications.cpp" />
+    <ClCompile Include="NoNamePipe.cpp" />
     <ClCompile Include="ShareMemory.cpp" />
     <ClCompile Include="TCPCommunications.cpp" />
     <ClCompile Include="UDPCommunications.cpp" />

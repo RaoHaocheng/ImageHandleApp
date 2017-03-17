@@ -57,6 +57,9 @@
     <ClInclude Include="ChainFromEdgeMap.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LineStructure.hh">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseImageHandleFunction.cpp">

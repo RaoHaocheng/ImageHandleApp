@@ -30,6 +30,9 @@
     <ClInclude Include="TCPCommunications.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NoNamePipe.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="communications.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TCPCommunications.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NoNamePipe.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
